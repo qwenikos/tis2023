@@ -2,7 +2,7 @@
 import misc
 import matplotlib.pyplot as plt
 from keras.layers import Input
-from models import create_cnn, create_gated_cnn, create_model, create_model_one_hot
+from models import create_cnn, create_gated_cnn, create_model
 from keras.models import Model
 import sys 
 import os

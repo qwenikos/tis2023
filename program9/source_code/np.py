@@ -1,50 +1,21 @@
-
 debug=True
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
 from misc import read_fasta_file, create_training_set_one_hot, create_testing_set_one_hot,create_training_set_emb,create_testing_set_emb
 
 from train import train_model,train_model_one_hot
+from models import create_cnn,cnn,classification
 
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
+from keras.models import Model
+from keras.layers import Input
+from keras.optimizers import SGD
+import numpy as np
 
 #######################   General variable ###########################################################
-##dataset creation
-num_tr_data =130
-num_te_data =130
-start_point = 0 ##def 60-120
-end_point   = 200
-
-## training params
-# model_type='gated_cnn'      ## choices=['cnn', 'gated_cnn', 'hybrid'], help="if the kmers are overlapping")
-model_type   ='cnn' 
-
-params_tuning="no" ##choices=['yes', 'no'], default='no', help="Enables the hyperparameter tuning") if yes the member must be given as list of values eg params['lr'] =[0.001,0.002]
-
-##kmer embendings params
-vector_size ="30"
-vector_size = "vector_size_"+ vector_size
-overlapping = 'non-overlapping' ##choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
-made_by     ='positive'  ## choices=['positive', 'positive_negative']
-
-# k          = ['3,4'] ##what kmers create
-k           = [3] ## because i use on hot encoding to avoid loop\
-
-### params for training embendings
-params = {'lr': [], 'k': [], 'batch_size': [], 'kernel_size': [], 'layers':[], 'sample_dim':[], 'mntm':[], 'epochs': [], 'flt': [], 'branch': []}
-params_tuning == 'no'
-params['lr'] = 0.001
-params['batch_size'] = 64 
-params['kernel_size'] = 5          
-params['layers'] = 15  
-params['epochs'] = 50 
-params['flt'] = 25
-params['branch'] = 3
-params['k'] = k ## because i use on hot encoding to avoid loop\
-
-
 #### data files
 train_pos="../datasets/training/positive/positive_trainingSet_Flank-100.fa"
 ## >ENSG00000004776|19|O14558|-1|35754566|35757029|ENST00000004982
@@ -62,69 +33,34 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 ##>REGION_GT_50000_1_sorf_1:chr1:102467:102867:0:+
 ##CATTCTCATATGACAGATTTCAGATGGCATTCTTATTTCCCTGATTTCTTTTTGAGATAGCTTGCATTTCCCTCCTCTATATAAAGCCACCGTTTATCAAATGCCTACATGGACCAAGCAGTCCACAAGGGCTTCACAGACAGTTTTACTAAACTCATGCCAAAACTTTCAGGTTTTATACCTACCTTATAGATAAAGAAATTGAAGCTTATAGAGTTTAAGTAATGTTCCCAAAGCCTCGTGGCTAGTAATTCAAACCTAATTTCTGCCTACTCCAAAGTCTATTTTTCCTTATGATACTCTACTGCCTCTCCATGGATAAAGACAGAGATCACATATTAATAAAATTTGCACAAAGTCGGCAAATTGTTGAAAGGGAAGGCTAAGATGATTAATAAAA
 
-############################################
-def printd(*args):
-    if debug:
-        mes=" ".join(map(str,args))
-        print ("--->",mes)
-#############################################
 
 
-train_x_hot = {}
-train_y_hot = []
-val_x_hot = {}
-val_y_hot = []
-test_x_hot = {}
-test_y_hot = []
-sample_dim_hot = {}
+##dataset creation
+num_tr_data =10000
+num_te_data =10000
+start_point = 0 ##def 60-120
+end_point   = 200
+model_type   ='cnn' 
 
-train_x_emb = {}
-train_y_emb = []
-val_x_emb = {}
-val_y_emb = []
-test_x_emb = {}
-test_y_emb = []
-sample_dim_emb = {}
+flt         = 25
+kernel_size = 5
+lr          = 0.001
+batch_size  = 64
+epochs      = 50 
+
 ######################################################################################################
-
-
-###################################   create TRAIN ONE HOT data   #############################################
-#######################################################################################################
-printd("-------------create_training_set_one_hot--------------")
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data,) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
-printd ("len(train_pos_sequences)",len(train_pos_sequences))
-printd ("len(train_neg_sequences)",len(train_neg_sequences))
-
 train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_training_set_one_hot(train_pos_sequences, train_neg_sequences, split=True)
-printd (sample_dim_hot)
-# print(train_x_hot[0].shape)
-# exit()
-print (type(train_x_hot),train_x_hot.shape)
-printd ("train_x_hot.shape",train_x_hot.shape)
-printd ("train_y_hot.shape",train_y_hot.shape)
-printd ("val_x_hot.shape",val_x_hot.shape)
-printd ("val_y_hot.shape)",val_y_hot.shape)
 
-printd ("------------------------")
-printd ("----create TEST data----")
+
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
-
-printd ("len(test_pos_sequences)",len(test_pos_sequences))
-printd ("len(test_neg_sequences)",len(test_neg_sequences))
 test_x_hot, test_y_hot, _ = create_testing_set_one_hot(test_pos_sequences, test_neg_sequences)
 
-printd ("len(test_x_hot)",len(test_x_hot))
-printd ("len(test_y_hot)",len(test_y_hot))
 
-printd ("----train the model----")
-
-params['sample_dim'] = sample_dim_hot  
-printd ("train_x_hot.shape",train_x_hot.shape)
-
-###############################33 TRAINING
+###############################33 TRAINING################################
 mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + ".hdf5",
 				verbose = 0,
 				save_best_only = True)
@@ -146,74 +82,44 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 								cooldown=1,
 								min_lr=0.00001)
 
-print(type(train_x_hot), type(train_x_hot[0]), len(train_x_hot[0]))
-train_x_hot=list(train_x_hot)
-train_x_hot=[train_x_hot]
 
-model = create_model_one_hot(model_type, sample_dim=params['sample_dim'], kernel_size=params['kernel_size'], flt=params['flt'], lr=params['lr'], layers=params['layers'])
-		
-model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=params['epochs'], batch_size=params['batch_size'], callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
+sequence_input=Input(shape = (sample_dim_hot[0], sample_dim_hot[1]))
+
+out = cnn(sequence_input)
+
+out = classification(out)
+
+model = Model(inputs=sequence_input, outputs=out)
+
+sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
+
+model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
+
+# train_x_hot=list(train_x_hot)
+# train_x_hot=[train_x_hot]
+
+# val_x_hot=list(val_x_hot)
+# val_x_hot=[val_x_hot]
+
+# test_x_hot=list(test_x_hot)
+# test_x_hot=[test_x_hot]
+
+print (np.shape(train_x_hot[0]))
+print (np.shape(train_y_hot))
+
+print (np.shape(val_x_hot))
+print (np.shape(val_y_hot))
+
+
+model.fit(train_x_hot, train_y_hot, validation_data = (val_x_hot, val_y_hot), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=2)
+
+
 
 model.save('results/saved_model.h5')
-
 print("\n\t\t\t\tEvaluation: [loss, acc]\n")
-
-# print(test_x[3].shape, test_y[3].shape, params['sample_dim'][3])
-# print(test_x[4].shape, test_y[4].shape, params['sample_dim'][4])
-# print(test_x[5].shape, test_y[5].shape, params['sample_dim'][5])
-
-
-tresults = model.evaluate(test_x, test_y,
-										batch_size = params['batch_size'],
-										verbose = 1,
-										sample_weight = None)
-		
-print(params)
+tresults = model.evaluate(test_x, test_y, batch_size = batch_size, verbose = 1, sample_weight = None)	
 print(tresults)
-exit()
-# model, best_params, results = train_model_one_hot(model_type, train_x_hot, train_y_hot, val_x_hot, val_y_hot, test_x_hot, test_y_hot, params, params_tuning)
-train_model_one_hot
-
-
-
-#####################################   create EMBEDDING data   ############################################
-#######################################################################################################
-file = '../datasets/kmer_embedding/' + made_by + '/' + overlapping + '/' + vector_size + '/training/'
-for i in k:
-    file_pos = file + 'positive/' + str(i) + '-mer_emb.txt'
-    file_neg = file + 'negative/' + str(i) + '-mer_emb.txt' 
-    ##create_training_set In code to change from 1hot to kmers
-
-    print("-------------create_training_set_embendings--------------")
-    train_x_emb[i], train_y_emb, val_x_emb[i], val_y_emb, sample_dim_emb[i] = create_training_set_emb(train_pos_sequences, train_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=i, split=True)
-    print (sample_dim_emb[i])
-    print ("len(train_x_emb[i])",len(train_x_emb[i]))
-    print ("len(train_y_emb)",len(train_y_emb))
-    print ("len(val_x_emb[i])",len(val_x_emb[i]))
-    print ("len(val_y_emb)",len(val_y_emb))
-
-
-# file = '../datasets/kmer_embedding/' + made_by + '/' + overlapping + '/' + vector_size + '/testing/' ##use the positive
-
-
-for i in k:
-    file_pos = file + 'positive/' + str(i) + '-mer_emb.txt'
-    file_neg = file + 'negative/' + str(i) + '-mer_emb.txt' 
-    ##create_training_set In code to change from 1hot to kmers
-    test_x_emb[i], test_y_emb, _ = create_testing_set_emb(test_pos_sequences, test_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=i)
-
-    print ("len(test_x_emb[i])",len(test_x_emb[i]))
-    print ("len(test_y_emb)",len(test_y_emb))
-
-
-
-#######################################    train the model  ###########################################
-#######################################################################################################
 
 
 
 
-# model, best_params, results = train_model(model_type, train_x_emb, train_y_emb, val_x_emb, val_y_emb, test_x_emb, test_y_emb, params, params_tuning)
-
-
-print ("----END----")

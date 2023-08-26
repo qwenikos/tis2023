@@ -24,7 +24,7 @@ np.random.seed(2000)
 # Necessary for starting core Python generated random numbers in a well-defined state.
 rn.seed(2023)
 
-def cnn(input_sequence, flt, kern_size):
+def cnn(input_sequence):
   print('size of input sequence', input_sequence)
   x = Conv1D(filters = 70, kernel_size = 4, strides = 1, padding = "same")(input_sequence)
   x = LeakyReLU()(x)
@@ -45,19 +45,7 @@ def cnn(input_sequence, flt, kern_size):
   x = LeakyReLU()(x)
   x = BatchNormalization(renorm=True)(x)
   # x = MaxPooling1D(pool_size = 2, padding = "same")(x)
-  x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
-
-  # x = Conv2D(filters = 180, kernel_size = 7, strides = 1, padding = "same")(x)
-  # x = LeakyReLU()(x)
-  # x = BatchNormalization()(x)
-  # x = MaxPooling1D(pool_size = 2, padding = "same")(x)
-  # x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
-
-  # x = Conv1D(filters = flt, kernel_size = 4, strides = 1, padding = "same")(x)
-  # x = LeakyReLU()(x)
-  # x = BatchNormalization()(x)
-  # x = MaxPooling1D(pool_size = 2, padding = "same")(x)
-  # x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)    
+  x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x) 
 
   out = Flatten()(x)
 
@@ -244,42 +232,3 @@ def create_model(model_type, sample_dim, kernel_size, flt, layers, lr, k):
   
   return model
 
-  
-
-def create_model_one_hot(model_type, sample_dim, kernel_size, flt, layers, lr):
-  sequence_input = []
-  concatenated = []
-  
-  print ("sample_dim",sample_dim)
-  
- 
-  print('input_shape', sample_dim[0], sample_dim[1])
-  print("-->",Input(shape = (sample_dim[0], sample_dim[1])))
-  sequence_input.append(Input(shape = (sample_dim[0], sample_dim[1])))      # upstream
-  res = feature_extraction(model_type, sequence_input, kernel_size, flt, layers)
-  print('output_shape', res.shape)
-  concatenated.append(res)
-  print ("concatenated",concatenated)
-
-  out = tf.concat([i for i in concatenated], axis=1)
-
-  print(out.shape)
-
-  # exit()
-  out = classification(out)
-
-
-  model = Model(inputs=sequence_input, outputs=out)
-
-
-  sgd = SGD(learning_rate = lr,
-    decay = 1e-6,
-    momentum = 0.9,
-    nesterov = True)
-
-  model.compile(loss = "binary_crossentropy",
-                optimizer=sgd,
-                metrics = ["accuracy"])
-
-  
-  return model
