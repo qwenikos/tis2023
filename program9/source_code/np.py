@@ -113,9 +113,9 @@ model.fit(train_x_hot, train_y_hot, validation_data = (val_x_hot, val_y_hot), sh
 
 
 
-model.save('results/saved_model.h5')
+# model.save('results/saved_model.h5')
 print("\n\t\t\t\tEvaluation: [loss, acc]\n")
-tresults = model.evaluate(test_x, test_y, batch_size = batch_size, verbose = 1, sample_weight = None)	
+tresults = model.evaluate(test_x_hot, test_y_hot, batch_size = batch_size, verbose = 1, sample_weight = None)	
 print(tresults)
 
 
