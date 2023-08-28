@@ -242,6 +242,7 @@ def convert_sequences_to_one_hot(sequences):
 
 def convert_sequences_to_embedding(sequences, k, overlapping, filename=''):
 
+  sequences = subsequences(sequences)
   sequences = clean_sequences(sequences)
 
   kmer_emb = kmer_embedding(sequences, k, filename, overlapping)
@@ -296,12 +297,12 @@ def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
 def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, positions=[], k=3, split=False):
   s = []
 
-  set_x_pos = convert_sequences_to_embedding(pos_sequences, positions, k, overlapping, file_pos)
+  set_x_pos = convert_sequences_to_embedding(pos_sequences, k, overlapping, file_pos)
   print ("create_training_set():set_x_pos.shape",set_x_pos.shape)
   print ("create_training_set():len(set_x_pos)",len(set_x_pos))
   print ("create_training_set():len(set_x_pos[0])",len(set_x_pos[0]))
 
-  set_x_neg = convert_sequences_to_embedding(neg_sequences, positions, k, overlapping, file_neg)
+  set_x_neg = convert_sequences_to_embedding(neg_sequences, k, overlapping, file_neg)
   print ("create_training_set():len(set_x_neg)",len(set_x_neg))
 
   set_x = np.concatenate((set_x_pos, set_x_neg)) ######ERROR why concat 
@@ -332,6 +333,7 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
     set_x, set_y = shuffle(set_x, set_y)
 
     return [set_x, set_y, sample_dim]
+
 
 def create_sets(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, positions=[], k=3, split=False):
   s = []
