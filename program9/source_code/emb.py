@@ -100,8 +100,10 @@ for i in k:
     file_pos = file + 'positive/' + str(i) + '-mer_emb.txt'
     file_neg = file + 'negative/' + str(i) + '-mer_emb.txt' 
     train_x[i], train_y, val_x[i], val_y, sample_dim[i] = create_training_set_emb(train_pos_sequences, train_neg_sequences, positions=[start_point, end_point], file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=i, split=True)
-    print(sample_dim)
+    print("sample_dim",sample_dim)
     
+print ("np.shape(train_x[3])",np.shape(train_x[3]))
+print ("np.shape(train_x[4])",np.shape(train_x[4]))
 
 params['sample_dim'] = sample_dim    
 
