@@ -34,8 +34,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =10000
-num_te_data =10000
+num_tr_data =500
+num_te_data =500
 start_point = 0 ##def 60-120
 end_point   = 200
 model_type   ='cnn' 
@@ -51,6 +51,8 @@ epochs      = 50
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data,) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
 train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_training_set_one_hot(train_pos_sequences, train_neg_sequences, split=True)
+print (sample_dim_hot)
+exit()
 
 
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
@@ -80,7 +82,8 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 								cooldown=1,
 								min_lr=0.00001)
 
-
+print (sample_dim_hot[0], sample_dim_hot[1])
+exit()
 sequence_input=Input(shape = (sample_dim_hot[0], sample_dim_hot[1]))
 
 out = cnn(sequence_input)

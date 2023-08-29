@@ -43,8 +43,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =100
-num_te_data =100
+num_tr_data =500
+num_te_data =500
 start_point = 0 ##def 60-120 works well for 0 200
 end_point   = 200
 model_type   ='cnn' 
@@ -95,7 +95,7 @@ sample_dim = {}
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data,) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
-
+print (len(train_neg_sequences))
 for i in k:
     file_pos = file + 'positive/' + str(i) + '-mer_emb.txt'
     file_neg = file + 'negative/' + str(i) + '-mer_emb.txt' 
@@ -105,7 +105,7 @@ for i in k:
 
 params['sample_dim'] = sample_dim    
 
-
+exit()
 
 
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
@@ -168,6 +168,8 @@ print (sample_dim)
 sequence_input = []
 size = len(k)
 for i,j in zip(k,range(size)):
+    print (sample_dim[i][0], sample_dim[i][1], sample_dim[i][2])
+    exit()
     sequence_input.append(Input(shape = (sample_dim[i][0], sample_dim[i][1], sample_dim[i][2]))) 
     # res = feature_extraction(model_type, sequence_input[j], kernel_size, flt, layers)
     out = cnn(sequence_input)

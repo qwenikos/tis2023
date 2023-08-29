@@ -218,122 +218,122 @@ def train_model(model_type, train_x, train_y, val_x, val_y, test_x, test_y, para
 
 		return [model, params, tresults]
 
-# def train_model_one_hot(model_type, train_x, train_y, val_x, val_y, test_x, test_y, params, params_tuning):
+def train_model_one_hot(model_type, train_x, train_y, val_x, val_y, test_x, test_y, params, params_tuning):
 
-# 	mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + ".hdf5",
-# 				verbose = 0,
-# 				save_best_only = True)
+	mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + ".hdf5",
+				verbose = 0,
+				save_best_only = True)
 
 
-# 	earlystopper = EarlyStopping(monitor = 'val_loss', 
-# 					patience = 10,
-# 					min_delta = 0,
-# 					verbose = 1,
-# 					mode = 'auto')
+	earlystopper = EarlyStopping(monitor = 'val_loss', 
+					patience = 10,
+					min_delta = 0,
+					verbose = 1,
+					mode = 'auto')
 
-# 	csv_logger = CSVLogger('results' + "/CNNonRaw_" + str(os.getpid()) + ".log.csv", 
-# 				append=True, 
-# 				separator='\t')
+	csv_logger = CSVLogger('results' + "/CNNonRaw_" + str(os.getpid()) + ".log.csv", 
+				append=True, 
+				separator='\t')
 	
-# 	reduce_lr = ReduceLROnPlateau(monitor='val_loss', 
-# 								factor=0.2,
-#                               	patience=5, 
-# 								cooldown=1,
-# 								min_lr=0.00001)
+	reduce_lr = ReduceLROnPlateau(monitor='val_loss', 
+								factor=0.2,
+                              	patience=5, 
+								cooldown=1,
+								min_lr=0.00001)
 
 	
 
 
-# 	if params_tuning == 'yes':
-# 		for tmp_epochs in params['epochs']:
-# 			for tmp_batch_size in params['batch_size']:
-# 				for tmp_lr in params['lr']:
-# 					for layers, flt in zip(params['layers'], params['flt']):
-# 						model = create_model(model_type, sample_dim=params['sample_dim'], kernel_size=params['kernel_size'], flt=flt, lr=tmp_lr, layers=layers, k=params['k'])
+	if params_tuning == 'yes':
+		for tmp_epochs in params['epochs']:
+			for tmp_batch_size in params['batch_size']:
+				for tmp_lr in params['lr']:
+					for layers, flt in zip(params['layers'], params['flt']):
+						model = create_model(model_type, sample_dim=params['sample_dim'], kernel_size=params['kernel_size'], flt=flt, lr=tmp_lr, layers=layers, k=params['k'])
 
-# 						print("\t\t\tTraining network.")
-# 						# don't forget to add early stopping
-# 						history = model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=tmp_epochs, batch_size=tmp_batch_size, callbacks = [ earlystopper, reduce_lr, mcp ], verbose=1)
-
-
+						print("\t\t\tTraining network.")
+						# don't forget to add early stopping
+						history = model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=tmp_epochs, batch_size=tmp_batch_size, callbacks = [ earlystopper, reduce_lr, mcp ], verbose=1)
 
 
-# 						print("\t\t\tTesting network.")
-# 						tresults = model.evaluate(test_x, test_y,
-# 						batch_size = tmp_batch_size,
-# 						verbose = 1,
-# 						callbacks=[csv_logger],
-# 						sample_weight = None)
-# 						print("\t\t\t[loss, acc]")
-# 						print(tresults)
+
+
+						print("\t\t\tTesting network.")
+						tresults = model.evaluate(test_x, test_y,
+						batch_size = tmp_batch_size,
+						verbose = 1,
+						callbacks=[csv_logger],
+						sample_weight = None)
+						print("\t\t\t[loss, acc]")
+						print(tresults)
 			
-# 						# summarize history for accuracy  
-# 						plt.plot(history.history['accuracy'])
-# 						plt.plot(history.history['val_accuracy'])
-# 						plt.ylim(0.0, 1.0)
-# 						plt.title('Model Accuracy')
-# 						plt.ylabel('Accuracy')
-# 						plt.xlabel('Epoch')
-# 						plt.legend(['Train', 'Validation'], loc='lower right')
-# 						plt.savefig('results' + "/CNNonRaw.acc.png", dpi=300)
-# 						plt.clf()
+						# summarize history for accuracy  
+						plt.plot(history.history['accuracy'])
+						plt.plot(history.history['val_accuracy'])
+						plt.ylim(0.0, 1.0)
+						plt.title('Model Accuracy')
+						plt.ylabel('Accuracy')
+						plt.xlabel('Epoch')
+						plt.legend(['Train', 'Validation'], loc='lower right')
+						plt.savefig('results' + "/CNNonRaw.acc.png", dpi=300)
+						plt.clf()
 
-# 						# summarize history for loss
-# 						plt.plot(history.history['loss'])
-# 						plt.plot(history.history['val_loss'])
-# 						plt.ylim(0.0, max(max(history.history['loss']), max(history.history['val_loss'])))
-# 						plt.title('Model Loss')
-# 						plt.ylabel('Categorical Crossentropy')
-# 						plt.xlabel('Epoch')
-# 						plt.legend(['Train', 'Validation'], loc='upper right')
-# 						plt.savefig('results' + "/CNNonRaw.loss.png", dpi=300)
-# 						plt.clf()
-
-
-
-# 						f.write('batch_size: ', tmp_batch_size, ' epochs: ', tmp_epochs, ', tmp_lr: ', lr,  ', flt: ', flt, '\n')	
-# 						f.write(tresults, '\n\n')
+						# summarize history for loss
+						plt.plot(history.history['loss'])
+						plt.plot(history.history['val_loss'])
+						plt.ylim(0.0, max(max(history.history['loss']), max(history.history['val_loss'])))
+						plt.title('Model Loss')
+						plt.ylabel('Categorical Crossentropy')
+						plt.xlabel('Epoch')
+						plt.legend(['Train', 'Validation'], loc='upper right')
+						plt.savefig('results' + "/CNNonRaw.loss.png", dpi=300)
+						plt.clf()
 
 
-# 	else:  ##param tuning= off
 
-# 		print ("\t\t\tTraining network.")
-
-
-# 		# train_x = [v for k, v in train_x.items()]
-# 		# val_x = [v for k, v in val_x.items()]
-# 		# test_x = [v for k, v in test_x.items()]
+						f.write('batch_size: ', tmp_batch_size, ' epochs: ', tmp_epochs, ', tmp_lr: ', lr,  ', flt: ', flt, '\n')	
+						f.write(tresults, '\n\n')
 
 
-# 		print(type(train_x), type(train_x[0]), len(train_x[0]))
-# 		train_x=list(train_x)
-# 		train_x=[train_x]
-# 		# print(len(train_x))
-# 		# print(len(train_x[0]))
-# 		# print(len(train_x[0][0]))
-# 		# print(len(train_x[0][0][0]))
-# 		# exit()
-# 		# print ("call create_model_one_hot")
-# 		model = create_model_one_hot(model_type, sample_dim=params['sample_dim'], kernel_size=params['kernel_size'], flt=params['flt'], lr=params['lr'], layers=params['layers'])
+	else:  ##param tuning= off
+
+		print ("\t\t\tTraining network.")
+
+
+		# train_x = [v for k, v in train_x.items()]
+		# val_x = [v for k, v in val_x.items()]
+		# test_x = [v for k, v in test_x.items()]
+
+
+		print(type(train_x), type(train_x[0]), len(train_x[0]))
+		train_x=list(train_x)
+		train_x=[train_x]
+		# print(len(train_x))
+		# print(len(train_x[0]))
+		# print(len(train_x[0][0]))
+		# print(len(train_x[0][0][0]))
+		# exit()
+		# print ("call create_model_one_hot")
+		model = create_model_one_hot(model_type, sample_dim=params['sample_dim'], kernel_size=params['kernel_size'], flt=params['flt'], lr=params['lr'], layers=params['layers'])
 		
-# 		model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=params['epochs'], batch_size=params['batch_size'], callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
+		model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=params['epochs'], batch_size=params['batch_size'], callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
 
-# 		model.save('results/saved_model.h5')
+		model.save('results/saved_model.h5')
 
-# 		print("\n\t\t\t\tEvaluation: [loss, acc]\n")
+		print("\n\t\t\t\tEvaluation: [loss, acc]\n")
 
-# 		# print(test_x[3].shape, test_y[3].shape, params['sample_dim'][3])
-# 		# print(test_x[4].shape, test_y[4].shape, params['sample_dim'][4])
-# 		# print(test_x[5].shape, test_y[5].shape, params['sample_dim'][5])
+		# print(test_x[3].shape, test_y[3].shape, params['sample_dim'][3])
+		# print(test_x[4].shape, test_y[4].shape, params['sample_dim'][4])
+		# print(test_x[5].shape, test_y[5].shape, params['sample_dim'][5])
 
 
-# 		tresults = model.evaluate(test_x, test_y,
-# 										batch_size = params['batch_size'],
-# 										verbose = 1,
-# 										sample_weight = None)
+		tresults = model.evaluate(test_x, test_y,
+										batch_size = params['batch_size'],
+										verbose = 1,
+										sample_weight = None)
 		
-# 		print(params)
-# 		print(tresults)
+		print(params)
+		print(tresults)
 
-# 		return [model, params, tresults]
+		return [model, params, tresults]
 
