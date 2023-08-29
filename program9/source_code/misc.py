@@ -298,12 +298,12 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
   s = []
 
   set_x_pos = convert_sequences_to_embedding(pos_sequences, k, overlapping, file_pos)
-  print ("create_training_set():set_x_pos.shape",set_x_pos.shape)
-  print ("create_training_set():len(set_x_pos)",len(set_x_pos))
-  print ("create_training_set():len(set_x_pos[0])",len(set_x_pos[0]))
+  # print ("create_training_set():set_x_pos.shape",set_x_pos.shape)
+  # print ("create_training_set():len(set_x_pos)",len(set_x_pos))
+  # print ("create_training_set():len(set_x_pos[0])",len(set_x_pos[0]))
 
   set_x_neg = convert_sequences_to_embedding(neg_sequences, k, overlapping, file_neg)
-  print ("create_training_set():len(set_x_neg)",len(set_x_neg))
+  # print ("create_training_set():len(set_x_neg)",len(set_x_neg))
 
   set_x = np.concatenate((set_x_pos, set_x_neg)) ######ERROR why concat 
 
@@ -313,7 +313,7 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
 
   set_y = np.concatenate((set_y_pos, set_y_neg)) 
 
-  sample_dim = [set_x.shape[1], set_x.shape[2]]
+  sample_dim = [set_x.shape[1], set_x.shape[2],1] ## np why the 1 at the end
 
   if split == True:
     ##train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=True, test_size=0.33) 
@@ -322,7 +322,7 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
     print ("create_training_set(): len(train_y)",len(train_y))
     print ("create_training_set(): len(val_x)",len(val_x))
     print ("create_training_set(): len(val_y)",len(val_y))
-    sample_dim = [train_x.shape[1], train_x.shape[2]]
+    sample_dim = [train_x.shape[1], train_x.shape[2], 1] ## np why the 1 at the end
 
     train_x, train_y = shuffle(train_x, train_y)
     val_x, val_y = shuffle(val_x, val_y)

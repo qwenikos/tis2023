@@ -15,6 +15,13 @@ from keras.layers import Input
 from keras.optimizers import SGD
 import numpy as np
 
+############################################
+def printd(*args):
+    if debug:
+        mes=" ".join(map(str,args))
+        print ("--->",mes)
+#############################################
+
 #######################   General variable ###########################################################
 #### data files
 train_pos="../datasets/training/positive/positive_trainingSet_Flank-100.fa"
@@ -87,16 +94,18 @@ sample_dim = {}
 ######### new #######
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data,) ##num_tr_data <>0 then return num_tr RANDOM samples.
-
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
 
 for i in k:
     file_pos = file + 'positive/' + str(i) + '-mer_emb.txt'
     file_neg = file + 'negative/' + str(i) + '-mer_emb.txt' 
-
     train_x[i], train_y, val_x[i], val_y, sample_dim[i] = create_training_set_emb(train_pos_sequences, train_neg_sequences, positions=[start_point, end_point], file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=i, split=True)
+    print(sample_dim)
+    
 
 params['sample_dim'] = sample_dim    
+
+
 
 
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
@@ -134,4 +143,60 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 								cooldown=1,
 								min_lr=0.00001)
 
-                                
+train_x = [v for k, v in train_x.items()] ## first place 0,1,2 depending the k, second is the samplesNum and then a 66X1 fro the embendings
+val_x = [v for k, v in val_x.items()]
+test_x = [v for k, v in test_x.items()]
+
+
+# print ("train_x",train_x[0][0])
+# print ("train_x",len(train_x))
+# print ("val_x",len(val_x))
+# print ("test_x",len(test_x))
+# print ("train_x",np.shape(train_x[0]))
+
+# print ("train_x",np.shape(train_x[0][0]))
+# print ("val_x",np.shape(val_x[0][0]))
+# print ("test_x",np.shape(test_x[0][0]))
+# print()
+
+print (sample_dim)
+# print(sample_dim[i][0])
+# print(sample_dim[i][1])
+# print(sample_dim[i][2])
+
+# model = create_model(model_type, sample_dim=params['sample_dim'], kernel_size=params['kernel_size'], flt=params['flt'], lr=params['lr'], layers=params['layers'], k=params['k'])
+sequence_input = []
+size = len(k)
+for i,j in zip(k,range(size)):
+    sequence_input.append(Input(shape = (sample_dim[i][0], sample_dim[i][1], sample_dim[i][2]))) 
+    # res = feature_extraction(model_type, sequence_input[j], kernel_size, flt, layers)
+    out = cnn(sequence_input)
+    ### end feature extraction
+    print(out.shape)
+    concatenated.append(out)
+
+out = tf.concat([i for i in concatenated], axis=1)
+
+out = classification(out)
+
+model = Model(inputs=sequence_input, outputs=out)
+
+sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
+
+model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
+
+    
+model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=params['epochs'], batch_size=params['batch_size'], callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
+
+# model.save('results/saved_model.h5')
+
+print("\n\t\t\t\tEvaluation: [loss, acc]\n")
+
+
+tresults = model.evaluate(test_x, test_y,
+                                batch_size = params['batch_size'],
+                                verbose = 1,
+                                sample_weight = None)
+
+print(params)
+print(tresults)
