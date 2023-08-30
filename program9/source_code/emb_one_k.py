@@ -43,8 +43,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =133
-num_te_data =133
+num_tr_data =1000      
+num_te_data =1000
 start_point = 0 ##def 60-120 works well for 0 200
 end_point   = 200
 model_type   ='cnn' 
@@ -169,17 +169,21 @@ print (sample_dim)
 # model = create_model(model_type, sample_dim=params['sample_dim'], kernel_size=params['kernel_size'], flt=params['flt'], lr=params['lr'], layers=params['layers'], k=params['k'])
 sequence_input = []
 size = len(k)
-for i,j in zip(k,range(size)):
-    print (sample_dim[i][0], sample_dim[i][1])
+k=3
 
-    sequence_input.append(Input(shape = (sample_dim[i][0], sample_dim[i][1]))) 
+print (sample_dim[k][0], sample_dim[k][1])
+
+    
+sequence_input=(Input(shape = (sample_dim[k][0], sample_dim[k][1]))) 
     # res = feature_extraction(model_type, sequence_input[j], kernel_size, flt, layers)
-    out = cnn(sequence_input)
-    ### end feature extraction
-    print(out.shape)
-    concatenated.append(out)
 
-out = tf.concat([i for i in concatenated], axis=1)
+out = cnn(sequence_input)
+    
+#     ### end feature extraction
+# print(out.shape)
+# concatenated.append(out)
+
+# out = tf.concat([i for i in concatenated], axis=1)
 
 out = classification(out)
 
@@ -190,12 +194,12 @@ sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
 
     
-model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=params['epochs'], batch_size=params['batch_size'], callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
+model.fit(train_x[k-3], train_y, validation_data = (val_x[k-3], val_y), shuffle=True, epochs=params['epochs'], batch_size=params['batch_size'], callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
 
 # model.save('results/saved_model.h5')
 
 print("\n\t\t\t\tEvaluation: [loss, acc]\n")
-
+exit()
 
 tresults = model.evaluate(test_x, test_y,
                                 batch_size = params['batch_size'],
