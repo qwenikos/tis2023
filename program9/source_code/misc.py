@@ -193,10 +193,13 @@ def kmer_embedding(sequences, k, filename, overlapping):
   num_cols = num_of_kmers(k, sequences[:,0], overlapping)
 
   num_rows = len_embvec
+  print ("num_cols",num_cols)
+  print ("num_rows",num_rows)
 
-
+  print("sequences.shape",sequences.shape)
   kmers_emb_samples = np.zeros(shape = (sequences.shape[1], num_rows, num_cols, 1), dtype=np.float16)
-
+  print ("np.shape(kmers_emb_samples)",np.shape(kmers_emb_samples))
+  exit()
   for (i, sequence) in enumerate(sequences.T):
     # print(len(sequence))
     kmers = k_mers(sequence, k, overlapping)
@@ -220,7 +223,7 @@ def subsequences(sequences):
   end_point=seqLen-1
   
   window_size = end_point - start_point + 1
-  subseqs = np.zeros(shape = (window_size, len(sequences)), dtype=str)
+  subseqs = np.zeros(shape = (window_size, len(sequences)), dtype=str)  ##edw orizei grammes to windows size kai colse ta samples
 
   for (col_position, sequence) in enumerate(sequences):
     for i in range(start_point, end_point + 1):
@@ -241,10 +244,11 @@ def convert_sequences_to_one_hot(sequences):
 
 
 def convert_sequences_to_embedding(sequences, k, overlapping, filename=''):
-
+  ##here sequencesare lists
   sequences = subsequences(sequences)
+  print("sequences.shape",sequences.shape)
   sequences = clean_sequences(sequences)
-
+  print("sequences.shape",sequences.shape)
   kmer_emb = kmer_embedding(sequences, k, filename, overlapping)
 
   return kmer_emb
@@ -297,7 +301,7 @@ def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
 
 def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, positions=[], k=3, split=False):
   s = []
-
+  
   set_x_pos = convert_sequences_to_embedding(pos_sequences, k, overlapping, file_pos)
   print ("set_x_pos",np.shape(set_x_pos))
   exit()
