@@ -1,3 +1,4 @@
+debug=False
 import numpy as np
 import sys 
 import keras as kr
@@ -29,12 +30,11 @@ def read_fasta_file (input_file,start_point,end_point, num_samples=0):
         if l == 'N' or l == 'n':
           flag = 1
           break
-        if len(line)<300: ##added by nikos to remove small seqs
-          flag = 1
-      
+      if len(line)<300: ##added by nikos to remove small seqs
+        continue
       if flag == 1:
         continue
-      seqPart=line[start_point:end_point].rstrip()
+      seqPart=line[start_point:end_point].rstrip().upper()
       genes=genes+[seqPart]
   # print(genes[0])
   returned_genes = []
@@ -50,72 +50,31 @@ def read_fasta_file (input_file,start_point,end_point, num_samples=0):
   return returned_genes
 
 def subsequences(sequences):
-  # applying the above equeations, we will obtain in-frame TISs
-  seqLen=len(sequences[0])
-  start_point=0
-  end_point=seqLen-1
-  
-  window_size = end_point - start_point + 1
-  subseqs = np.zeros(shape = (window_size, len(sequences)), dtype=str)  ##edw orizei grammes to windows size kai cols ta samples
-  # print 
-  for (col_position, sequence) in enumerate(sequences):
-    # print (col_position,sequence)
-    for i in range(start_point, end_point + 1):
-      row_position = i - start_point
-      subseqs[row_position, col_position] = sequence[i]
-  
-  
-  print (subseqs.shape)
-  
+  subseqs=np.array([list(sequence) for sequence in sequences])
   return subseqs
 
 # removes the whitespaces characters at the beggining and 
 # at the end of a sequence or skips a sequence which 
 # contains the 'N' character
 def clean_sequences(sequences):
-  clean_seqs = np.zeros(shape = (sequences.shape[0], sequences.shape[1]), dtype=str)
-
-  col_position=0
-
-  for sequence in sequences.T:
-    flag = 0
-
-    for (row_position, row) in enumerate(sequence):
-      if row == '\n' or row == '\t' or row == ' ':                                 
-        clean_seqs = np.delete(clean_seqs, (col_position), axis=1)
-
-        flag = 1
-        break
-      
-      clean_seqs[row_position, col_position] = row[0].upper()
-
-    if flag == 1:
-      continue
-        
-    col_position += 1
-  print (clean_seqs.shape)
- 
-
-  return clean_seqs
+  return sequences
 
 # converts the sequences into one-hot encoding sequences
 def one_hot_encoding (sequences):
 
-  one_hot_samples = np.zeros(shape = (sequences.shape[1], 4, sequences.shape[0]), dtype=np.float32)
+  one_hot_samples = np.zeros(shape = (sequences.shape[0], 4, sequences.shape[1]), dtype=np.float32)
 
   col_position=0
 
-  for (i, sequence) in enumerate(sequences.T):
+  for (i, sequence) in enumerate(sequences):
     for (col_position, nucleotide) in enumerate(sequence):
-      # print(type(nucleotide), len(nucleotide), nucleotide, nucleotide[0])
-
 
       encoded_nuc = one_hot_conversion(nucleotide[0])
 
       for (row_position, one_hot) in enumerate(encoded_nuc):
         one_hot_samples[i, row_position, col_position] = one_hot
 
-  print (one_hot_samples.shape)
+  printd (one_hot_samples.shape)
 
   return one_hot_samples
 
@@ -124,27 +83,44 @@ def one_hot_encoding (sequences):
 # returns the kmer-embedding vectors of the sequences, 
 # which constracted by the GloVe algorithm
 def kmer_embedding(sequences, k, filename, overlapping):
-  c_matrix, len_embvec = coocurence_matrix(filename)        
+  printd ("sequences.shape",sequences.shape)
+  c_matrix, len_embvec = coocurence_matrix(filename) 
+  printd ("len_embvec",len_embvec)      
 
-  num_cols = num_of_kmers(k, sequences[:,0], overlapping)
+  num_cols = num_of_kmers(k, sequences[0], overlapping)
+  printd ("num_cols",num_cols)
+  # print (len(sequences[0]))
 
   num_rows = len_embvec
 
-  kmers_emb_samples = np.zeros(shape = (sequences.shape[1], num_rows, num_cols), dtype=np.float16)
+  printd ("num_rows",num_rows)
 
+  kmers_emb_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
+  printd ("kmers_emb_samples.shape",kmers_emb_samples.shape)
 
-  for (i, sequence) in enumerate(sequences.T):
-    # print(len(sequence))
+  for (i, sequence) in enumerate(sequences):
+    # printd(len(sequence))
     kmers = k_mers(sequence, k, overlapping)
+    # print (sequence)
+    printd (kmers)
+    
     for (col_position, kmer) in enumerate(kmers):
-      emb_vector = c_matrix[kmer]
+      if kmer in c_matrix:
+        emb_vector = c_matrix[kmer]
+      else:                         ##handling out of vocabulary words or "unseen words"
+        emb_vector = c_matrix["<unk>"] ## the last line in vector files
+
       for (row_position, num) in enumerate(emb_vector):
         # print(row_position, col_position)
         kmers_emb_samples[i, row_position, col_position] = num
 
-  print (kmers_emb_samples.shape)
+  printd("kmers_emb_samples.shape",kmers_emb_samples.shape)
 
   return kmers_emb_samples
+
+
+
+
 
 # converts a nucleotide into a 4-bit one-hot vector
 def one_hot_conversion(nucleotide):
@@ -167,14 +143,12 @@ def coocurence_matrix(filename):
   for line in lines:
     values = line.split()
     word = values[0]
+    
     coefs = np.asarray(values[1:], dtype='float32')
 
     coocurence_matrix[word] = coefs
-
-  emb_vectors = coocurence_matrix.values()
-  first_embvec = next(iter(emb_vectors))
-
-  embvec_size = first_embvec.shape[0]
+  embvec_size=len(coefs)
+  printd ("embvec_size",embvec_size)
 
   return coocurence_matrix, embvec_size
 
@@ -215,25 +189,26 @@ def k_mers(sequence, k, overlapping):
   return kmers
 
 
+def printd(*args):
+    if debug:
+        mes=" ".join(map(str,args))
+        print ("--->",mes)
+
   
 
 def convert_sequences_to_one_hot(sequences):
-  sequences = subsequences(sequences)
-  sequences = clean_sequences(sequences)
-
+  sequences=np.array([list(sequence) for sequence in sequences]) ##added to convert list to nparray of nts
+  # sequences = subsequences(sequences)
+  # sequences = clean_sequences(sequences)
   one_samples = one_hot_encoding(sequences)
-
   return one_samples
 
 
 def convert_sequences_to_embedding(sequences, k, overlapping, filename=''):
   ##here sequences are lists
-  sequences = subsequences(sequences)
-  # print("sequences.shape",sequences.shape)
-  sequences = clean_sequences(sequences)
-  # print("sequences.shape",sequences.shape)
+  sequences=np.array([list(sequence) for sequence in sequences]) ##added to convert list to nparray of nts
+  
   kmer_emb = kmer_embedding(sequences, k, filename, overlapping)
-
   return kmer_emb
 
 
@@ -247,7 +222,7 @@ def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
   # print ("create_training_set():set_x_pos.shape",set_x_pos.shape)
   # print ("create_training_set():len(set_x_pos)",len(set_x_pos))
   # print ("create_training_set():len(set_x_pos[0])",len(set_x_pos[0]))
-  print ("set_x_pos",np.shape(set_x_pos))  ### edw yparxei h diafora
+  printd ("set_x_pos",np.shape(set_x_pos))  ### edw yparxei h diafora
 
   set_x_neg = convert_sequences_to_one_hot(neg_sequences)
   # print ("create_training_set():len(set_x_neg)",len(set_x_neg))
@@ -265,10 +240,7 @@ def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
   if split == True:
     ##train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=True, test_size=0.33) 
     train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=False, test_size=0.33)  ##np make shuffle==False
-    # print ("create_training_set(): len(train_x)",len(train_x))
-    # print ("create_training_set(): len(train_y)",len(train_y))
-    # print ("create_training_set(): len(val_x)",len(val_x))
-    # print ("create_training_set(): len(val_y)",len(val_y))
+
     sample_dim = [train_x.shape[1], train_x.shape[2]]
 
     train_x, train_y = shuffle(train_x, train_y)
@@ -282,21 +254,16 @@ def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
     return [set_x, set_y, sample_dim]
 
 
-def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, positions=[], k=3, split=False):
+def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, k=3, split=False):
   s = []
+  ##here pos_sequences and neg_sequences are lists
   
   set_x_pos = convert_sequences_to_embedding(pos_sequences, k, overlapping, file_pos)
-  print ("set_x_pos",np.shape(set_x_pos))
+  printd ("set_x_pos",np.shape(set_x_pos))
  
-  # print ("create_training_set():set_x_pos.shape",set_x_pos.shape)
-  # print ("create_training_set():len(set_x_pos)",len(set_x_pos))
-  # print ("create_training_set():len(set_x_pos[0])",len(set_x_pos[0]))
-
   set_x_neg = convert_sequences_to_embedding(neg_sequences, k, overlapping, file_neg)
-  # print ("create_training_set():len(set_x_neg)",len(set_x_neg))
 
   set_x = np.concatenate((set_x_pos, set_x_neg)) ######ERROR why concat 
-
 
   set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
   set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)
@@ -321,6 +288,7 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
     set_x, set_y = shuffle(set_x, set_y)
 
     return [set_x, set_y, sample_dim]
+
 
 
 def create_sets(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, positions=[], k=3, split=False):

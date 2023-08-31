@@ -34,8 +34,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =133
-num_te_data =133
+num_tr_data =500
+num_te_data =500
 start_point = 0 ##def 60-120
 end_point   = 200
 model_type   ='cnn' 
@@ -48,7 +48,7 @@ epochs      = 50
 
 ######################################################################################################
 
-train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data,) ##num_tr_data <>0 then return num_tr RANDOM samples.
+train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
 train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_training_set_one_hot(train_pos_sequences, train_neg_sequences, split=True)
 
@@ -86,7 +86,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 print (sample_dim_hot[0], sample_dim_hot[1])
 
 sequence_input=Input(shape = (sample_dim_hot[0], sample_dim_hot[1]))
-exit()
+# exit()
 out = cnn(sequence_input)
 
 out = classification(out)
