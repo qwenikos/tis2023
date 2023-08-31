@@ -12,6 +12,12 @@ np.random.seed(2000)
 # Necessary for starting core Python generated random numbers in a well-defined state.
 rn.seed(2023)
 
+def printd(*args):
+    if debug:
+        mes=" ".join(map(str,args))
+        print ("--->",mes)
+
+
 
 def read_fasta_file (input_file,start_point,end_point, num_samples=0):
   f = open(input_file,'r')
@@ -83,26 +89,28 @@ def one_hot_encoding (sequences):
 # returns the kmer-embedding vectors of the sequences, 
 # which constracted by the GloVe algorithm
 def kmer_embedding(sequences, k, filename, overlapping):
-  printd ("sequences.shape",sequences.shape)
+
+  print ("sequences.shape",sequences.shape)
   c_matrix, len_embvec = coocurence_matrix(filename) 
-  printd ("len_embvec",len_embvec)      
+  # print ("len_embvec",len_embvec)      
 
   num_cols = num_of_kmers(k, sequences[0], overlapping)
-  printd ("num_cols",num_cols)
+  # print ("num_cols",num_cols)
   # print (len(sequences[0]))
 
   num_rows = len_embvec
 
-  printd ("num_rows",num_rows)
+  # print ("num_rows",num_rows)
 
   kmers_emb_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
-  printd ("kmers_emb_samples.shape",kmers_emb_samples.shape)
+  # print ("kmers_emb_samples.shape",kmers_emb_samples.shape)
 
   for (i, sequence) in enumerate(sequences):
     # printd(len(sequence))
     kmers = k_mers(sequence, k, overlapping)
     # print (sequence)
-    printd (kmers)
+    # print (kmers)
+    # exit()
     
     for (col_position, kmer) in enumerate(kmers):
       if kmer in c_matrix:
@@ -114,8 +122,8 @@ def kmer_embedding(sequences, k, filename, overlapping):
         # print(row_position, col_position)
         kmers_emb_samples[i, row_position, col_position] = num
 
-  printd("kmers_emb_samples.shape",kmers_emb_samples.shape)
-
+  print("kmers_emb_samples.shape",kmers_emb_samples.shape)
+  # exit()
   return kmers_emb_samples
 
 
@@ -172,27 +180,25 @@ def k_mers(sequence, k, overlapping):
     shift = k
     # count_kmers = len(sequence)
     count_kmers = num_of_kmers(k, sequence, overlapping)
+ 
 
-
-  else:
+  else:  ##if overlapping
     shift = 1
     # count_kmers = len(sequence) - k +1
     count_kmers = num_of_kmers(k, sequence, overlapping)
 
 
-  for i in range(0, count_kmers, shift):
+  # print ("count_kmers ",count_kmers,"shift ",shift)
+  for i in range(0, count_kmers): #########
+    # print (i)
     kmer = ''
     for j in range(k):
-      kmer += sequence[i+j]
+      kmer += sequence[i*shift+j]
 
     kmers.append(kmer)
+  # print ("len(kmers)",len(kmers))
   return kmers
 
-
-def printd(*args):
-    if debug:
-        mes=" ".join(map(str,args))
-        print ("--->",mes)
 
   
 
@@ -212,23 +218,19 @@ def convert_sequences_to_embedding(sequences, k, overlapping, filename=''):
   return kmer_emb
 
 
-# creates and returns sets, i.e either training set or test set, which are consist of 
-# samples and labels, <setname>_x and <setname>_y corresponding, where <setname>
-# corresponds to either training set or test set
+  # creates and returns sets, i.e either training set or test set, which are consist of 
+  # samples and labels, <setname>_x and <setname>_y corresponding, where <setname>
+  # corresponds to either training set or test set
 def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
   s = []
-
   set_x_pos = convert_sequences_to_one_hot(pos_sequences)
-  # print ("create_training_set():set_x_pos.shape",set_x_pos.shape)
-  # print ("create_training_set():len(set_x_pos)",len(set_x_pos))
-  # print ("create_training_set():len(set_x_pos[0])",len(set_x_pos[0]))
+
   printd ("set_x_pos",np.shape(set_x_pos))  ### edw yparxei h diafora
 
   set_x_neg = convert_sequences_to_one_hot(neg_sequences)
   # print ("create_training_set():len(set_x_neg)",len(set_x_neg))
 
   set_x = np.concatenate((set_x_pos, set_x_neg)) 
-
 
   set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
   set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)

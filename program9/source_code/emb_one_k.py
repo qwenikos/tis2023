@@ -39,11 +39,11 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 ##dataset creation
 
-k = 4
-num_tr_data =8000      
-num_te_data =5000
-start_point = 60 ##def 60-120 works well for 0 200
-end_point   = 120
+k = 3
+num_tr_data =3000      
+num_te_data =3000
+start_point = 0 ##def 60-120 works well for 0 200
+end_point   = 200
 model_type   ='cnn' 
 
 flt         = 25
@@ -54,33 +54,8 @@ epochs      = 50
 layers =15 ##  default=15, help="Number of gated convolution layers")
 branch = 3 ##  default='3', help="Number of branches of the model")
 
-vector_size=30
-vector_size = 'vector_size_' + str(vector_size)
+
 overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
-made_by = 'positive' ##default='positive', choices=['positive', 'positive_negative'], help="the vectors are made only by the positive dataset or
-params_tuning="no"
-params={}
-params['k'] = k
-params['lr'] = lr     
-params['batch_size'] = batch_size
-params['kernel_size'] = kernel_size       
-params['layers'] = layers
-params['epochs'] = epochs
-params['flt'] = flt
-params['branch'] = branch
-
-# file = '../datasets/kmer_embedding/' + made_by + '/' + overlapping + '/' + vector_size + '/training/'
-
-######################################################################################################
-train_x = {}
-train_y = []
-
-val_x = {}
-val_y = []
-
-test_x = {}
-test_y = []
-sample_dim = {}
 
 
 ######### new #######
@@ -89,8 +64,6 @@ train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_d
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
 printd (len(train_neg_sequences))
 
-# file_pos = file + 'positive/' + str(k) + '-mer_emb.txt'
-# file_neg = file + 'negative/' + str(k) + '-mer_emb.txt' 
 
 file_pos=str(k) + '-mer_emb.txt'  
 file_neg=str(k) + '-mer_emb.txt' ## to check here must be right .need the same file for pos and neg
@@ -98,27 +71,12 @@ file_neg=str(k) + '-mer_emb.txt' ## to check here must be right .need the same f
 train_x, train_y, val_x, val_y, sample_dim = create_training_set_emb(train_pos_sequences, train_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k, split=True)
 printd("sample_dim",sample_dim)
 
-# print ("np.shape(train_x[3])",np.shape(train_x[3]))
-# print ("np.shape(train_x[4])",np.shape(train_x[4]))
-
-params['sample_dim'] = sample_dim    
-
-
-
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
 
-
-# file_pos = file + 'positive/' + str(k) + '-mer_emb.txt'
-# file_neg = file + 'negative/' + str(k) + '-mer_emb.txt'
-
-
-
 test_x, test_y, _ = create_testing_set_emb(test_pos_sequences[0:num_te_data], test_neg_sequences[0:num_te_data], file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k)
 
-# exit()
 ###############################33 TRAINING################################
-#model, best_params, results = train_model(model_type, train_x, train_y, val_x, val_y, test_x, test_y, params, params_tuning)
 
 mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + ".hdf5",
 				verbose = 0,
@@ -141,46 +99,14 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 								cooldown=1,
 								min_lr=0.00001)
 
-# train_x = [v for k, v in train_x.items()] ## first place 0,1,2 depending the k, second is the samplesNum and then a 66X1 fro the embendings
-# val_x = [v for k, v in val_x.items()]
-# test_x = [v for k, v in test_x.items()]
-
-
-# print ("train_x",train_x[0][0])
-# print ("train_x",len(train_x))
-# print ("val_x",len(val_x))
-# print ("test_x",len(test_x))
-# print ("train_x",np.shape(train_x[0]))
-
-# print ("train_x",np.shape(train_x[0][0]))
-# print ("val_x",np.shape(val_x[0][0]))
-# print ("test_x",np.shape(test_x[0][0]))
-# print()
-
-# print (sample_dim)
-# print(sample_dim[i][0])
-# print(sample_dim[i][1])
-# print(sample_dim[i][2])
-
-# model = create_model(model_type, sample_dim=params['sample_dim'], kernel_size=params['kernel_size'], flt=params['flt'], lr=params['lr'], layers=params['layers'], k=params['k'])
-# sequence_input = []
-# size = len(k)
-# k=5
 
 printd ("sample_dim",sample_dim)
 
-    
 sequence_input=(Input(shape = (sample_dim[0], sample_dim[1]))) 
     # res = feature_extraction(model_type, sequence_input[j], kernel_size, flt, layers)
 
 out = cnn(sequence_input)
     
-#     ### end feature extraction
-# print(out.shape)
-# concatenated.append(out)
-
-# out = tf.concat([i for i in concatenated], axis=1)
-
 out = classification(out)
 
 model = Model(inputs=sequence_input, outputs=out)
@@ -190,17 +116,14 @@ sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
 
     
-model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=params['epochs'], batch_size=params['batch_size'], callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
+model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
 
 # model.save('results/saved_model.h5')
 
 print("\n\t\t\t\tEvaluation: [loss, acc]\n")
-exit()
 
-tresults = model.evaluate(test_x, test_y,
-                                batch_size = params['batch_size'],
-                                verbose = 1,
-                                sample_weight = None)
 
-print(params)
-print(tresults)
+tresults = model.evaluate(test_x, test_y, batch_size = batch_size, verbose = 1, sample_weight = None)
+
+
+# print(tresults)
