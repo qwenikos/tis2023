@@ -122,13 +122,101 @@ def kmer_embedding(sequences, k, filename, overlapping):
         # print(row_position, col_position)
         kmers_emb_samples[i, row_position, col_position] = num
 
-  print("kmers_emb_samples.shape",kmers_emb_samples.shape)
-  # exit()
-  return kmers_emb_samples
+
+################################################################
+###return a list of kmers and their one hot representatio
+def np_generate_all_kmers_one_hot(k):
+    nucleotides = ['A', 'T', 'C', 'G']
+    kmers = ['']
+    
+    for a in range(k):
+        # print (a)
+        new_kmers = []
+        for kmer in kmers:
+            for nt in nucleotides:
+                new_kmers.append(kmer + nt)
+        kmers = new_kmers
+
+    kmer_to_index = {kmer: i for i, kmer in enumerate(kmers)}
+    num_kmers = len(kmers)
+    kmersOnHotDict={}
+    one_hot_enc_kmers = np.zeros((num_kmers, num_kmers), dtype=int)
+    for i, kmer in enumerate(kmers):
+        one_hot_enc_kmers[i, kmer_to_index[kmer]] = 1
+        kmersOnHotDict[kmer]=one_hot_enc_kmers
+
+
+    return kmersOnHotDict,kmers,one_hot_enc_kmers
+
+def kmers_one_hot_encoding (sequences):
+  print ("here")
+  exit()
+  # one_hot_samples = np.zeros(shape = (sequences.shape[0], 4, sequences.shape[1]), dtype=np.float32)
+
+  # col_position=0
+
+  # for (i, sequence) in enumerate(sequences):
+  #   for (col_position, nucleotide) in enumerate(sequence):
+
+  #     encoded_nuc = one_hot_conversion(nucleotide[0])
+
+  #     for (row_position, one_hot) in enumerate(encoded_nuc):
+  #       one_hot_samples[i, row_position, col_position] = one_hot
+
+  # printd (one_hot_samples.shape)
+
+  return one_hot_samples
+
+
+def convert_sequences_to_kmers_one_hot(sequences):
+  sequences=np.array([list(sequence) for sequence in sequences]) ##added to convert list to nparray of nts
+  # sequences = subsequences(sequences)
+  # sequences = clean_sequences(sequences)
+
+  # one_samples = one_hot_encoding(sequences)
+  one_samples = kmers_one_hot_encoding(sequences) ##to impement
+  return one_samples
+
+def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,split=False):
+  s = []
+  # set_x_pos = convert_sequences_to_one_hot(pos_sequences)
+  set_x_pos = convert_sequences_to_kmers_one_hot(pos_sequences)
+  
+
+  printd ("set_x_pos",np.shape(set_x_pos))  ### edw yparxei h diafora
+
+  # set_x_neg = convert_sequences_to_one_hot(neg_sequences)
+  set_x_neg = convert_sequences_to_kmers_one_hot(neg_sequences)
+  # print ("create_training_set():len(set_x_neg)",len(set_x_neg))
+
+  set_x = np.concatenate((set_x_pos, set_x_neg)) 
+
+  set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
+  set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)
+
+  set_y = np.concatenate((set_y_pos, set_y_neg)) 
+
+  sample_dim = [set_x.shape[1], set_x.shape[2]]
+
+  if split == True:
+    ##train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=True, test_size=0.33) 
+    train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=False, test_size=0.33)  ##np make shuffle==False
+
+    sample_dim = [train_x.shape[1], train_x.shape[2]]
+
+    train_x, train_y = shuffle(train_x, train_y)
+    val_x, val_y = shuffle(val_x, val_y)
+
+    return [train_x, train_y, val_x, val_y, sample_dim]
+  
+  else:
+    set_x, set_y = shuffle(set_x, set_y)
+
+    return [set_x, set_y, sample_dim]
 
 
 
-
+################################################################
 
 # converts a nucleotide into a 4-bit one-hot vector
 def one_hot_conversion(nucleotide):
@@ -198,6 +286,12 @@ def k_mers(sequence, k, overlapping):
     kmers.append(kmer)
   # print ("len(kmers)",len(kmers))
   return kmers
+
+def convert_sequece_to_one_hot_encoded_kmers(sequence, k):
+  ####complete here
+
+    
+    return encoding
 
 
   
@@ -361,6 +455,7 @@ def read_fasta_file_old (input_file, num_samples=0):
 
   return returned_genes
 
-create_testing_set_one_hot = create_training_set_one_hot = create_sets_one_hot
-create_testing_set_emb = create_training_set_emb = create_sets_emb
-create_testing_set = create_training_set = create_sets
+create_testing_set_one_hot      = create_training_set_one_hot      = create_sets_one_hot
+create_testing_set_emb          = create_training_set_emb          = create_sets_emb
+create_testing_set              = create_training_set              = create_sets
+create_testing_set_kmer_one_hot = create_training_set_kmer_one_hot = create_sets_kmers_one_hot

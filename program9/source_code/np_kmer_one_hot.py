@@ -34,8 +34,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =10000
-num_te_data =10000
+num_tr_data =500
+num_te_data =500
 start_point = 0 ##def 60-120
 end_point   = 200
 model_type   ='cnn' 
@@ -47,10 +47,14 @@ batch_size  = 64
 epochs      = 50 
 
 ######################################################################################################
+### create kmers Dictionary
+kmersOnHotDict,kmers,one_hot_enc_kmers=np_generate_all_kmers_one_hot(k)
+
+
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
-train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_training_set_one_hot(train_pos_sequences, train_neg_sequences, split=True)
+train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_training_set_kmer_one_hot(train_pos_sequences, train_neg_sequences, k=k, split=True)
 
 print ("np.shape(train_x)",np.shape(train_x_hot))
 
@@ -58,7 +62,7 @@ print (sample_dim_hot)
 
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
-test_x_hot, test_y_hot, _ = create_testing_set_one_hot(test_pos_sequences, test_neg_sequences)
+test_x_hot, test_y_hot, _ = create_testing_set_kmer_one_hot(test_pos_sequences, test_neg_sequences)
 
 
 ###############################33 TRAINING################################
