@@ -156,20 +156,16 @@ def np_generate_all_kmers_one_hot(k):
     return kmersOnHotDict,kmers,one_hot_enc_kmers
 
 def kmers_one_hot_encoding (sequences,overlapping, k): ## add the k in args
+  print (np.shape(sequences))
   kmersOnHotDict,kmers,one_hot_enc_kmers=np_generate_all_kmers_one_hot(k)
-  # print ("here")
-  # exit()
-
-  print ("sequences.shape",sequences.shape)
  
   num_cols = num_of_kmers(k, sequences[0], overlapping)
   num_rows = num_cols ## it is the same
-
-  # print ("num_rows",num_rows)
-
+  
+  
   kmers_emb_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
-  # print ("kmers_emb_samples.shape",kmers_emb_samples.shape)
-
+  print ("kmers_emb_samples.shape",kmers_emb_samples.shape)
+  exit()
   for (i, sequence) in enumerate(sequences):
     # printd(len(sequence))
     kmers = k_mers(sequence, k, overlapping)
@@ -184,6 +180,7 @@ def kmers_one_hot_encoding (sequences,overlapping, k): ## add the k in args
       for (row_position, num) in enumerate(kmer_one_hot):
         # print(row_position, col_position)
         kmers_emb_samples[i, row_position, col_position] = num
+      
   return kmers_emb_samples
 
 

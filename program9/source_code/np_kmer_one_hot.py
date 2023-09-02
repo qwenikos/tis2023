@@ -35,8 +35,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =3000
-num_te_data =3000
+num_tr_data =300
+num_te_data =300
 start_point = 80 ##def 60-120
 end_point   = 120
 model_type   ='cnn' 
