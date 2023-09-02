@@ -121,6 +121,7 @@ def kmer_embedding(sequences, k, filename, overlapping):
       for (row_position, num) in enumerate(emb_vector):
         # print(row_position, col_position)
         kmers_emb_samples[i, row_position, col_position] = num
+  return kmers_emb_samples
 
 
 ################################################################
@@ -143,50 +144,68 @@ def np_generate_all_kmers_one_hot(k):
     one_hot_enc_kmers = np.zeros((num_kmers, num_kmers), dtype=int)
     for i, kmer in enumerate(kmers):
         one_hot_enc_kmers[i, kmer_to_index[kmer]] = 1
-        kmersOnHotDict[kmer]=one_hot_enc_kmers
+    
+    for i, kmer in enumerate(kmers):
+        onHot=np.asarray(one_hot_enc_kmers[:,i])
+        # print (onHot)
+        kmersOnHotDict[kmer]=onHot
+        # print (np.shape(np.asarray(one_hot_enc_kmers[:,i]))) ## extract column as 1d array
+        # exit()
 
 
     return kmersOnHotDict,kmers,one_hot_enc_kmers
 
-def kmers_one_hot_encoding (sequences):
-  print ("here")
-  exit()
-  # one_hot_samples = np.zeros(shape = (sequences.shape[0], 4, sequences.shape[1]), dtype=np.float32)
+def kmers_one_hot_encoding (sequences,overlapping, k): ## add the k in args
+  kmersOnHotDict,kmers,one_hot_enc_kmers=np_generate_all_kmers_one_hot(k)
+  # print ("here")
+  # exit()
 
-  # col_position=0
+  print ("sequences.shape",sequences.shape)
+ 
+  num_cols = num_of_kmers(k, sequences[0], overlapping)
+  num_rows = num_cols ## it is the same
 
-  # for (i, sequence) in enumerate(sequences):
-  #   for (col_position, nucleotide) in enumerate(sequence):
+  # print ("num_rows",num_rows)
 
-  #     encoded_nuc = one_hot_conversion(nucleotide[0])
+  kmers_emb_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
+  # print ("kmers_emb_samples.shape",kmers_emb_samples.shape)
 
-  #     for (row_position, one_hot) in enumerate(encoded_nuc):
-  #       one_hot_samples[i, row_position, col_position] = one_hot
+  for (i, sequence) in enumerate(sequences):
+    # printd(len(sequence))
+    kmers = k_mers(sequence, k, overlapping)
+    # print (sequence)
+    # print (kmers)
+    # exit()
+    
+    for (col_position, kmer) in enumerate(kmers):
+      if kmer in kmersOnHotDict:
+        kmer_one_hot = kmersOnHotDict[kmer]
 
-  # printd (one_hot_samples.shape)
+      for (row_position, num) in enumerate(kmer_one_hot):
+        # print(row_position, col_position)
+        kmers_emb_samples[i, row_position, col_position] = num
+  return kmers_emb_samples
 
-  return one_hot_samples
 
-
-def convert_sequences_to_kmers_one_hot(sequences):
+def convert_sequences_to_kmers_one_hot(sequences, overlapping, k):
   sequences=np.array([list(sequence) for sequence in sequences]) ##added to convert list to nparray of nts
   # sequences = subsequences(sequences)
   # sequences = clean_sequences(sequences)
 
   # one_samples = one_hot_encoding(sequences)
-  one_samples = kmers_one_hot_encoding(sequences) ##to impement
+  one_samples = kmers_one_hot_encoding(sequences,overlapping, k) ##to impement
   return one_samples
 
-def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,split=False):
+def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,overlapping, split=False):
   s = []
   # set_x_pos = convert_sequences_to_one_hot(pos_sequences)
-  set_x_pos = convert_sequences_to_kmers_one_hot(pos_sequences)
+  set_x_pos = convert_sequences_to_kmers_one_hot(pos_sequences, overlapping, k)
   
 
   printd ("set_x_pos",np.shape(set_x_pos))  ### edw yparxei h diafora
 
   # set_x_neg = convert_sequences_to_one_hot(neg_sequences)
-  set_x_neg = convert_sequences_to_kmers_one_hot(neg_sequences)
+  set_x_neg = convert_sequences_to_kmers_one_hot(neg_sequences, overlapping, k)
   # print ("create_training_set():len(set_x_neg)",len(set_x_neg))
 
   set_x = np.concatenate((set_x_pos, set_x_neg)) 
@@ -241,6 +260,8 @@ def coocurence_matrix(filename):
     word = values[0]
     
     coefs = np.asarray(values[1:], dtype='float32')
+    print (np.shape(coefs))
+    exit()
 
     coocurence_matrix[word] = coefs
   embvec_size=len(coefs)

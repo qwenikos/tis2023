@@ -3,7 +3,8 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
-from misc import read_fasta_file, create_training_set_one_hot, create_testing_set_one_hot,create_training_set_emb,create_testing_set_emb
+from misc import (read_fasta_file, create_training_set_one_hot, create_testing_set_one_hot,
+	create_training_set_emb,create_testing_set_emb,create_training_set_kmer_one_hot, create_testing_set_kmer_one_hot)
 
 from train import train_model,train_model_one_hot
 from models import create_cnn,cnn,classification
@@ -34,10 +35,10 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =500
-num_te_data =500
-start_point = 0 ##def 60-120
-end_point   = 200
+num_tr_data =3000
+num_te_data =3000
+start_point = 80 ##def 60-120
+end_point   = 120
 model_type   ='cnn' 
 
 flt         = 25
@@ -45,16 +46,15 @@ kernel_size = 5
 lr          = 0.001
 batch_size  = 64
 epochs      = 50 
+k=3
+overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
 
 ######################################################################################################
 ### create kmers Dictionary
-kmersOnHotDict,kmers,one_hot_enc_kmers=np_generate_all_kmers_one_hot(k)
-
-
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
-train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_training_set_kmer_one_hot(train_pos_sequences, train_neg_sequences, k=k, split=True)
+train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_training_set_kmer_one_hot(train_pos_sequences, train_neg_sequences,overlapping=overlapping, k=k, split=True)
 
 print ("np.shape(train_x)",np.shape(train_x_hot))
 
@@ -62,7 +62,7 @@ print (sample_dim_hot)
 
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
-test_x_hot, test_y_hot, _ = create_testing_set_kmer_one_hot(test_pos_sequences, test_neg_sequences)
+test_x_hot, test_y_hot, _ = create_testing_set_kmer_one_hot(test_pos_sequences, test_neg_sequences,overlapping=overlapping,k=k)
 
 
 ###############################33 TRAINING################################
