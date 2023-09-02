@@ -5,7 +5,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
 from misc import read_fasta_file, create_training_set_one_hot, create_testing_set_one_hot,create_training_set_emb,create_testing_set_emb
 
-from train import train_model,train_model_one_hot
+# from train import train_model,train_model_one_hot
 from models import create_cnn,cnn,classification
 
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau

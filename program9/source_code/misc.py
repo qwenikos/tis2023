@@ -261,7 +261,7 @@ def coocurence_matrix(filename):
     
     coefs = np.asarray(values[1:], dtype='float32')
     print (np.shape(coefs))
-    exit()
+    # exit()
 
     coocurence_matrix[word] = coefs
   embvec_size=len(coefs)
@@ -308,11 +308,11 @@ def k_mers(sequence, k, overlapping):
   # print ("len(kmers)",len(kmers))
   return kmers
 
-def convert_sequece_to_one_hot_encoded_kmers(sequence, k):
-  ####complete here
+# def convert_sequece_to_one_hot_encoded_kmers(sequence, k):
+#   ####complete here
 
     
-    return encoding
+#     return encoding
 
 
   
@@ -408,75 +408,75 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
 
 
 
-def create_sets(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, positions=[], k=3, split=False):
-  s = []
+# def create_sets(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, positions=[], k=3, split=False):
+#   s = []
 
-  set_x_pos = convert_sequences(pos_sequences, positions, k, overlapping, file_pos)
+#   set_x_pos = convert_sequences(pos_sequences, positions, k, overlapping, file_pos)
 
-  set_x_neg = convert_sequences(neg_sequences, positions, k, overlapping, file_neg)
+#   set_x_neg = convert_sequences(neg_sequences, positions, k, overlapping, file_neg)
 
-  set_x = np.concatenate((set_x_pos, set_x_neg))
-
-
-  set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
-  set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)
-
-  set_y = np.concatenate((set_y_pos, set_y_neg)) 
+#   set_x = np.concatenate((set_x_pos, set_x_neg))
 
 
+#   set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
+#   set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)
 
-  sample_dim = [set_x.shape[1], set_x.shape[2]]
+#   set_y = np.concatenate((set_y_pos, set_y_neg)) 
 
-  if split == True:
-    train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=True, test_size=0.33)
 
-    sample_dim = [train_x.shape[1], train_x.shape[2]]
 
-    train_x, train_y = shuffle(train_x, train_y)
-    val_x, val_y = shuffle(val_x, val_y)
+#   sample_dim = [set_x.shape[1], set_x.shape[2]]
 
-    return [train_x, train_y, val_x, val_y, sample_dim]
+#   if split == True:
+#     train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=True, test_size=0.33)
+
+#     sample_dim = [train_x.shape[1], train_x.shape[2]]
+
+#     train_x, train_y = shuffle(train_x, train_y)
+#     val_x, val_y = shuffle(val_x, val_y)
+
+#     return [train_x, train_y, val_x, val_y, sample_dim]
   
-  else:
-    set_x, set_y = shuffle(set_x, set_y)
+#   else:
+#     set_x, set_y = shuffle(set_x, set_y)
 
-    return [set_x, set_y, sample_dim]
+#     return [set_x, set_y, sample_dim]
 
-def read_fasta_file_old (input_file, num_samples=0):
-  f = open(input_file,'r')
+# def read_fasta_file_old (input_file, num_samples=0):
+#   f = open(input_file,'r')
 
-  lines = f.readlines()
+#   lines = f.readlines()
 
-  genes = set()
+#   genes = set()
 
-  for line in lines:
-    if line[0] == '>':
-      continue 
-    else:
-      flag = 0
-      for l in line:
-        if l == 'N' or l == 'n':
-          flag = 1
-          break
+#   for line in lines:
+#     if line[0] == '>':
+#       continue 
+#     else:
+#       flag = 0
+#       for l in line:
+#         if l == 'N' or l == 'n':
+#           flag = 1
+#           break
       
-      if flag == 1:
-        continue
+#       if flag == 1:
+#         continue
 
-      genes.add(line)
+#       genes.add(line)
 
-  returned_genes = []
+#   returned_genes = []
 
-  for gene in genes:
-    returned_genes.append(gene)
+#   for gene in genes:
+#     returned_genes.append(gene)
   
-  if num_samples != 0:
-    returned_genes = rn.sample(returned_genes, num_samples)
+#   if num_samples != 0:
+#     returned_genes = rn.sample(returned_genes, num_samples)
   
-  f.close()
+#   f.close()
 
-  return returned_genes
+#   return returned_genes
 
 create_testing_set_one_hot      = create_training_set_one_hot      = create_sets_one_hot
 create_testing_set_emb          = create_training_set_emb          = create_sets_emb
-create_testing_set              = create_training_set              = create_sets
+# create_testing_set              = create_training_set              = create_sets
 create_testing_set_kmer_one_hot = create_training_set_kmer_one_hot = create_sets_kmers_one_hot
