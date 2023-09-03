@@ -17,8 +17,6 @@ def printd(*args):
         mes=" ".join(map(str,args))
         print ("--->",mes)
 
-
-
 def read_fasta_file (input_file,start_point,end_point, num_samples=0):
   f = open(input_file,'r')
 
@@ -158,25 +156,26 @@ def np_generate_all_kmers_one_hot(k):
 def kmers_one_hot_encoding (sequences,overlapping, k): ## add the k in args
   print (np.shape(sequences))
   kmersOnHotDict,kmers,one_hot_enc_kmers=np_generate_all_kmers_one_hot(k)
+  print ("np.shape(one_hot_enc_kmers)",np.shape(one_hot_enc_kmers))
  
-  num_cols = num_of_kmers(k, sequences[0], overlapping)
-  num_rows = num_cols ## it is the same
+  num_cols = num_of_kmers(k, sequences[0], overlapping) #num of kmers in sequence
+  num_rows = len(kmers) ## size of on hot encoding
   
   
   kmers_emb_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
   print ("kmers_emb_samples.shape",kmers_emb_samples.shape)
-  exit()
+
   for (i, sequence) in enumerate(sequences):
     # printd(len(sequence))
     kmers = k_mers(sequence, k, overlapping)
     # print (sequence)
-    # print (kmers)
-    # exit()
+    # print ("len(kmers)",len(kmers))
+    
     
     for (col_position, kmer) in enumerate(kmers):
       if kmer in kmersOnHotDict:
         kmer_one_hot = kmersOnHotDict[kmer]
-
+        # print (kmer_one_hot)
       for (row_position, num) in enumerate(kmer_one_hot):
         # print(row_position, col_position)
         kmers_emb_samples[i, row_position, col_position] = num
