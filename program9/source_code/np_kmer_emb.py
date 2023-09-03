@@ -54,16 +54,13 @@ epochs      = 50
 layers =15 ##  default=15, help="Number of gated convolution layers")
 branch = 3 ##  default='3', help="Number of branches of the model")
 
-
 overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
-
 
 ######### new #######
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data,) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
-printd (len(train_neg_sequences))
-
+# printd (len(train_neg_sequences))
 
 file_pos=str(k) + '-mer_emb.txt'  
 file_neg=str(k) + '-mer_emb.txt' ## to check here must be right .need the same file for pos and neg
@@ -100,7 +97,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 								min_lr=0.00001)
 
 
-printd ("sample_dim",sample_dim)
+# printd ("sample_dim",sample_dim)
 
 sequence_input=(Input(shape = (sample_dim[0], sample_dim[1]))) 
     # res = feature_extraction(model_type, sequence_input[j], kernel_size, flt, layers)
@@ -114,7 +111,6 @@ model = Model(inputs=sequence_input, outputs=out)
 sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 
 model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
-
     
 model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
 

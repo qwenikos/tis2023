@@ -35,8 +35,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 num_tr_data =6000
 num_te_data =6000
-start_point = 90 ##def 60-120
-end_point   = 110
+start_point = 60 ##def 60-120
+end_point   = 140
 
 model_type   ='cnn' 
 
@@ -45,7 +45,7 @@ kernel_size = 5
 lr          = 0.001
 batch_size  = 64
 epochs      = 50 
-k=3
+k=6
 overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
 
 ######################################################################################################
