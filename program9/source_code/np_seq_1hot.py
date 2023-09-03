@@ -5,7 +5,6 @@ os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
 from misc import read_fasta_file, create_training_set_one_hot, create_testing_set_one_hot,create_training_set_emb,create_testing_set_emb
 
-# from train import train_model,train_model_one_hot
 from models import create_cnn,cnn,classification
 
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
@@ -36,8 +35,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 ##dataset creation
 num_tr_data =500
 num_te_data =500
-start_point = 0 ##def 60-120
-end_point   = 200
+start_point = 80 ##def 60-120
+end_point   = 120
 model_type   ='cnn' 
 
 flt         = 25
@@ -60,12 +59,10 @@ test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
 test_x_hot, test_y_hot, _ = create_testing_set_one_hot(test_pos_sequences, test_neg_sequences)
 
-
 ###############################33 TRAINING################################
 mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + ".hdf5",
 				verbose = 0,
 				save_best_only = True)
-
 
 earlystopper = EarlyStopping(monitor = 'val_loss', 
 					patience = 10,
