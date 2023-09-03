@@ -36,23 +36,18 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 ##CATTCTCATATGACAGATTTCAGATGGCATTCTTATTTCCCTGATTTCTTTTTGAGATAGCTTGCATTTCCCTCCTCTATATAAAGCCACCGTTTATCAAATGCCTACATGGACCAAGCAGTCCACAAGGGCTTCACAGACAGTTTTACTAAACTCATGCCAAAACTTTCAGGTTTTATACCTACCTTATAGATAAAGAAATTGAAGCTTATAGAGTTTAAGTAATGTTCCCAAAGCCTCGTGGCTAGTAATTCAAACCTAATTTCTGCCTACTCCAAAGTCTATTTTTCCTTATGATACTCTACTGCCTCTCCATGGATAAAGACAGAGATCACATATTAATAAAATTTGCACAAAGTCGGCAAATTGTTGAAAGGGAAGGCTAAGATGATTAATAAAA
 
 
-
-##dataset creation
-
 k = 3
-num_tr_data =3000      
-num_te_data =3000
-start_point = 0 ##def 60-120 works well for 0 200
-end_point   = 200
+num_tr_data =6000      
+num_te_data =6000
+start_point = 60 ##def 60-120 works well for 0 200
+end_point   = 140
 model_type   ='cnn' 
 
-flt         = 25
 lr          = 0.001
 batch_size  = 64
-kernel_size = 5
+kernel_size = 3
 epochs      = 50 
 layers =15 ##  default=15, help="Number of gated convolution layers")
-branch = 3 ##  default='3', help="Number of branches of the model")
 
 overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
 
@@ -80,9 +75,9 @@ mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + "
 				save_best_only = True)
 
 
-earlystopper = EarlyStopping(monitor = 'val_loss', 
-					patience = 10,
-					min_delta = 0,
+earlystopper = EarlyStopping(monitor = 'val_accuracy', ## 'val_loss' for regression tasks or 'val_accuracy' for classification tasks.
+					patience = 10, ##A common value is around 10-20 epochs. it was 10 fro vasiliki
+					min_delta = 0.0001, ## A small value like 0.0001 is often used. It was 0
 					verbose = 1,
 					mode = 'auto')
 
@@ -100,7 +95,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 # printd ("sample_dim",sample_dim)
 
 sequence_input=(Input(shape = (sample_dim[0], sample_dim[1]))) 
-    # res = feature_extraction(model_type, sequence_input[j], kernel_size, flt, layers)
+
 
 out = cnn(sequence_input)
     
@@ -110,11 +105,12 @@ model = Model(inputs=sequence_input, outputs=out)
 
 sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 
-model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
+# model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
+model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy"])
     
 model.fit(train_x, train_y, validation_data = (val_x, val_y), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=1)
 
-# model.save('results/saved_model.h5')
+model.save('results/saved_model_np_kmer_emp.h5')
 
 print("\n\t\t\t\tEvaluation: [loss, acc]\n")
 

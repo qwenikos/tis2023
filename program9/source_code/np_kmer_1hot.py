@@ -33,19 +33,19 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 ##dataset creation
 
-num_tr_data =6000
-num_te_data =6000
-start_point = 60 ##def 60-120
-end_point   = 140
+num_tr_data =3000
+num_te_data =3000
+start_point = 0 ##def 60-120
+end_point   = 200
 
 model_type   ='cnn' 
 
 flt         = 25
-kernel_size = 5
+kernel_size = 3
 lr          = 0.001
 batch_size  = 64
-epochs      = 50 
-k=6
+epochs      = 10
+k=4
 overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
 
 ######################################################################################################
@@ -91,11 +91,12 @@ model = Model(inputs=sequence_input, outputs=out)
 
 sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 
-model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
+# model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
+model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy"])
 
 model.fit(train_x_hot, train_y_hot, validation_data = (val_x_hot, val_y_hot), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=2)
 
-# model.save('results/saved_model.h5')
+model.save('results/saved_model_np_kmer_1hot.h5')
 print("\n\t\t\t\tEvaluation: [loss, acc]\n")
 tresults = model.evaluate(test_x_hot, test_y_hot, batch_size = batch_size, verbose = 1, sample_weight = None)	
 print(tresults)

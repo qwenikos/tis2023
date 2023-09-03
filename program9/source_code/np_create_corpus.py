@@ -9,8 +9,8 @@ from misc import clean_sequences, subsequences, k_mers, read_fasta_file
 
 
 k=3
-start_point = 0
-end_point = 200
+start_point = 60
+end_point = 140
 
 
 overlapping="overlapping" ##choices=['overlapping', 'non-overlapping']

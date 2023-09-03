@@ -21,9 +21,8 @@ def read_fasta_file (input_file,start_point,end_point, num_samples=0):
   f = open(input_file,'r')
 
   lines = f.readlines()
-  # print (lines[1])
-  # genes = set() ##Set change the order
-  genes=[] ##nikos
+
+  genes=[] 
 
   for line in lines:
     if line[0] == '>':
@@ -40,7 +39,7 @@ def read_fasta_file (input_file,start_point,end_point, num_samples=0):
         continue
       seqPart=line[start_point:end_point].rstrip().upper()
       genes=genes+[seqPart]
-  # print(genes[0])
+
   returned_genes = []
 
   for gene in genes:
@@ -78,7 +77,6 @@ def one_hot_encoding (sequences):
       for (row_position, one_hot) in enumerate(encoded_nuc):
         one_hot_samples[i, row_position, col_position] = one_hot
 
-  # printd (one_hot_samples.shape)
 
   return one_hot_samples
 
@@ -107,7 +105,7 @@ def kmer_embedding(sequences, k, filename, overlapping):
         emb_vector = c_matrix["<unk>"] ## the last line in vector files
 
       for (row_position, num) in enumerate(emb_vector):
-        # print(row_position, col_position)
+
         kmers_emb_samples[i, row_position, col_position] = num
   return kmers_emb_samples
 
@@ -118,7 +116,7 @@ def np_generate_all_kmers_one_hot(k):
     kmers = ['']
     
     for a in range(k):
-        # print (a)
+
         new_kmers = []
         for kmer in kmers:
             for nt in nucleotides:
@@ -174,12 +172,8 @@ def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,overlapping, split=
   # set_x_pos = convert_sequences_to_one_hot(pos_sequences)
   set_x_pos = convert_sequences_to_kmers_one_hot(pos_sequences, overlapping, k)
   
-
-  printd ("set_x_pos",np.shape(set_x_pos))  ### edw yparxei h diafora
-
-  # set_x_neg = convert_sequences_to_one_hot(neg_sequences)
   set_x_neg = convert_sequences_to_kmers_one_hot(neg_sequences, overlapping, k)
-  # print ("create_training_set():len(set_x_neg)",len(set_x_neg))
+
 
   set_x = np.concatenate((set_x_pos, set_x_neg)) 
 
@@ -191,7 +185,7 @@ def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,overlapping, split=
   sample_dim = [set_x.shape[1], set_x.shape[2]]
 
   if split == True:
-    ##train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=True, test_size=0.33) 
+
     train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=False, test_size=0.33)  ##np make shuffle==False
 
     sample_dim = [train_x.shape[1], train_x.shape[2]]
@@ -206,8 +200,6 @@ def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,overlapping, split=
 
     return [set_x, set_y, sample_dim]
 
-
-
 ################################################################
 
 # converts a nucleotide into a 4-bit one-hot vector
@@ -221,7 +213,6 @@ def one_hot_conversion(nucleotide):
 
   return one_hot_map[nucleotide]
 
-
 def coocurence_matrix(filename):
   f = open(filename, 'r')
 
@@ -233,12 +224,9 @@ def coocurence_matrix(filename):
     word = values[0]
     
     coefs = np.asarray(values[1:], dtype='float32')
-    print (np.shape(coefs))
-    # exit()
 
     coocurence_matrix[word] = coefs
   embvec_size=len(coefs)
-  printd ("embvec_size",embvec_size)
 
   return coocurence_matrix, embvec_size
 
@@ -269,32 +257,21 @@ def k_mers(sequence, k, overlapping):
     # count_kmers = len(sequence) - k +1
     count_kmers = num_of_kmers(k, sequence, overlapping)
 
-
-  # print ("count_kmers ",count_kmers,"shift ",shift)
   for i in range(0, count_kmers): #########
-    # print (i)
+
     kmer = ''
     for j in range(k):
       kmer += sequence[i*shift+j]
 
     kmers.append(kmer)
-  # print ("len(kmers)",len(kmers))
+
   return kmers
-
-# def convert_sequece_to_one_hot_encoded_kmers(sequence, k):
-#   ####complete here
-
-    
-#     return encoding
-
-
-  
 
 def convert_sequences_to_one_hot(sequences):
   sequences=np.array([list(sequence) for sequence in sequences]) ##added to convert list to nparray of nts
-  # sequences = subsequences(sequences)
-  # sequences = clean_sequences(sequences)
+
   one_samples = one_hot_encoding(sequences)
+  
   return one_samples
 
 
@@ -313,10 +290,7 @@ def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
   s = []
   set_x_pos = convert_sequences_to_one_hot(pos_sequences)
 
-  printd ("set_x_pos",np.shape(set_x_pos))  ### edw yparxei h diafora
-
   set_x_neg = convert_sequences_to_one_hot(neg_sequences)
-  # print ("create_training_set():len(set_x_neg)",len(set_x_neg))
 
   set_x = np.concatenate((set_x_pos, set_x_neg)) 
 
@@ -349,7 +323,6 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
   ##here pos_sequences and neg_sequences are lists
   
   set_x_pos = convert_sequences_to_embedding(pos_sequences, k, overlapping, file_pos)
-  printd ("set_x_pos",np.shape(set_x_pos))
  
   set_x_neg = convert_sequences_to_embedding(neg_sequences, k, overlapping, file_neg)
 
@@ -380,76 +353,6 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
     return [set_x, set_y, sample_dim]
 
 
-
-# def create_sets(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, positions=[], k=3, split=False):
-#   s = []
-
-#   set_x_pos = convert_sequences(pos_sequences, positions, k, overlapping, file_pos)
-
-#   set_x_neg = convert_sequences(neg_sequences, positions, k, overlapping, file_neg)
-
-#   set_x = np.concatenate((set_x_pos, set_x_neg))
-
-
-#   set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
-#   set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)
-
-#   set_y = np.concatenate((set_y_pos, set_y_neg)) 
-
-
-
-#   sample_dim = [set_x.shape[1], set_x.shape[2]]
-
-#   if split == True:
-#     train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=True, test_size=0.33)
-
-#     sample_dim = [train_x.shape[1], train_x.shape[2]]
-
-#     train_x, train_y = shuffle(train_x, train_y)
-#     val_x, val_y = shuffle(val_x, val_y)
-
-#     return [train_x, train_y, val_x, val_y, sample_dim]
-  
-#   else:
-#     set_x, set_y = shuffle(set_x, set_y)
-
-#     return [set_x, set_y, sample_dim]
-
-# def read_fasta_file_old (input_file, num_samples=0):
-#   f = open(input_file,'r')
-
-#   lines = f.readlines()
-
-#   genes = set()
-
-#   for line in lines:
-#     if line[0] == '>':
-#       continue 
-#     else:
-#       flag = 0
-#       for l in line:
-#         if l == 'N' or l == 'n':
-#           flag = 1
-#           break
-      
-#       if flag == 1:
-#         continue
-
-#       genes.add(line)
-
-#   returned_genes = []
-
-#   for gene in genes:
-#     returned_genes.append(gene)
-  
-#   if num_samples != 0:
-#     returned_genes = rn.sample(returned_genes, num_samples)
-  
-#   f.close()
-
-#   return returned_genes
-
 create_testing_set_one_hot      = create_training_set_one_hot      = create_sets_one_hot
 create_testing_set_emb          = create_training_set_emb          = create_sets_emb
-# create_testing_set              = create_training_set              = create_sets
 create_testing_set_kmer_one_hot = create_training_set_kmer_one_hot = create_sets_kmers_one_hot
