@@ -106,12 +106,9 @@ def kmer_embedding(sequences, k, filename, overlapping):
   # print ("kmers_emb_samples.shape",kmers_emb_samples.shape)
 
   for (i, sequence) in enumerate(sequences):
-    # printd(len(sequence))
+
     kmers = k_mers(sequence, k, overlapping)
-    # print (sequence)
-    # print (kmers)
-    # exit()
-    
+
     for (col_position, kmer) in enumerate(kmers):
       if kmer in c_matrix:
         emb_vector = c_matrix[kmer]
@@ -147,54 +144,53 @@ def np_generate_all_kmers_one_hot(k):
     
     for i, kmer in enumerate(kmers):
         onHot=np.asarray(one_hot_enc_kmers[:,i])
-        # print (onHot)
-        kmersOnHotDict[kmer]=onHot
-        # print (np.shape(np.asarray(one_hot_enc_kmers[:,i]))) ## extract column as 1d array
-        # exit()
 
+        kmersOnHotDict[kmer]=onHot
 
     return kmersOnHotDict,kmers,one_hot_enc_kmers
 
-def kmers_one_hot_encoding (sequences,overlapping, k): ## add the k in args
-  kmersOnHotDict,kmers,one_hot_enc_kmers=np_generate_all_kmers_one_hot(k)
-  # print ("here")
-  # exit()
 
+
+def kmers_one_hot_encoding (sequences,overlapping, k): ## add the k in args
   print ("sequences.shape",sequences.shape)
- 
+
+  kmersOnHotDict,kmers,one_hot_enc_kmers=np_generate_all_kmers_one_hot(k)
+
   num_cols = num_of_kmers(k, sequences[0], overlapping)
+
   num_rows = num_cols ## it is the same
 
-  # print ("num_rows",num_rows)
+  kmers_one_hot_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
 
-  kmers_emb_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
-  # print ("kmers_emb_samples.shape",kmers_emb_samples.shape)
+  print ("kmers_one_hot_samples.shape",kmers_one_hot_samples.shape)
 
   for (i, sequence) in enumerate(sequences):
-    # printd(len(sequence))
+
     kmers = k_mers(sequence, k, overlapping)
-    # print (sequence)
-    # print (kmers)
-    # exit()
     
     for (col_position, kmer) in enumerate(kmers):
+
       if kmer in kmersOnHotDict:
+
         kmer_one_hot = kmersOnHotDict[kmer]
 
       for (row_position, num) in enumerate(kmer_one_hot):
-        # print(row_position, col_position)
-        kmers_emb_samples[i, row_position, col_position] = num
-  return kmers_emb_samples
+
+        kmers_one_hot_samples[i, row_position, col_position] = num
+    exit() ####kapoy edw gineti to lathos
+  return kmers_one_hot_samples
 
 
 def convert_sequences_to_kmers_one_hot(sequences, overlapping, k):
   sequences=np.array([list(sequence) for sequence in sequences]) ##added to convert list to nparray of nts
-  # sequences = subsequences(sequences)
-  # sequences = clean_sequences(sequences)
+  print ("sequences.shape",sequences.shape)
 
-  # one_samples = one_hot_encoding(sequences)
   one_samples = kmers_one_hot_encoding(sequences,overlapping, k) ##to impement
+  # print ("one_samples.shape",one_samples.shape)
+  exit()
+
   return one_samples
+
 
 def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,overlapping, split=False):
   s = []
@@ -478,5 +474,5 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
 
 create_testing_set_one_hot      = create_training_set_one_hot      = create_sets_one_hot
 create_testing_set_emb          = create_training_set_emb          = create_sets_emb
-# create_testing_set              = create_training_set              = create_sets
+
 create_testing_set_kmer_one_hot = create_training_set_kmer_one_hot = create_sets_kmers_one_hot
