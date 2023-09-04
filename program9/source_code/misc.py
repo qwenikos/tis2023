@@ -1,4 +1,5 @@
-debug=False
+debug=True
+
 import numpy as np
 import sys 
 import keras as kr
@@ -353,6 +354,6 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
     return [set_x, set_y, sample_dim]
 
 
-create_testing_set_one_hot      = create_training_set_one_hot      = create_sets_one_hot
-create_testing_set_emb          = create_training_set_emb          = create_sets_emb
-create_testing_set_kmer_one_hot = create_training_set_kmer_one_hot = create_sets_kmers_one_hot
+# create_testing_set_one_hot      = create_training_set_one_hot      = create_sets_one_hot
+# create_testing_set_emb          = create_training_set_emb          = create_sets_emb
+# create_testing_set_kmer_one_hot = create_training_set_kmer_one_hot = create_sets_kmers_one_hot

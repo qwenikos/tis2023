@@ -24,9 +24,9 @@ np.random.seed(2000)
 # Necessary for starting core Python generated random numbers in a well-defined state.
 rn.seed(2023)
 
-def cnn(input_sequence):
+def cnn(input_sequence,kernel_Size=5,flt=70):
   print('size of input sequence', input_sequence)
-  x = Conv1D(filters = 70, kernel_size = 4, strides = 1, padding = "same")(input_sequence)
+  x = Conv1D(filters = flt, kernel_size = kernel_Size, strides = 1, padding = "same")(input_sequence)
   x = LeakyReLU()(x)
   # print('before batchnormalization', x.shape)
   x = BatchNormalization(renorm=True)(x)
@@ -35,17 +35,17 @@ def cnn(input_sequence):
 
   x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
 
-  x = Conv1D(filters = 100, kernel_size = 4, strides = 1, padding = "same")(x)
+  x = Conv1D(filters = flt*1.5, kernel_size = kernel_Size, strides = 1, padding = "same")(x)  ##flt=70
   x = LeakyReLU()(x)
   x = BatchNormalization(renorm=True)(x)
   # x = MaxPooling2D(pool_size = 3, padding = "same")(x)
   x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
 
-  x = Conv1D(filters = 150, kernel_size = 4, strides = 1, padding = "same")(x)
+  x = Conv1D(filters = flt*2, kernel_size = kernel_Size, strides = 1, padding = "same")(x) ##flt=100
   x = LeakyReLU()(x)
   x = BatchNormalization(renorm=True)(x)
   # x = MaxPooling1D(pool_size = 2, padding = "same")(x)
-  x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x) 
+  x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x) ##flt=150
 
   out = Flatten()(x)
 
