@@ -167,7 +167,7 @@ def convert_sequences_to_kmers_one_hot(sequences, overlapping, k):
   return one_samples
 
 
-def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,overlapping, split=False):
+def create_sets_kmer_one_hot(pos_sequences, neg_sequences,overlapping='overlapping',k=3, split=False):
   s = []
   # set_x_pos = convert_sequences_to_one_hot(pos_sequences)
   set_x_pos = convert_sequences_to_kmers_one_hot(pos_sequences, overlapping, k)
@@ -286,7 +286,7 @@ def convert_sequences_to_embedding(sequences, k, overlapping, filename=''):
   # creates and returns sets, i.e either training set or test set, which are consist of 
   # samples and labels, <setname>_x and <setname>_y corresponding, where <setname>
   # corresponds to either training set or test set
-def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
+def create_sets_seq_one_hot(pos_sequences, neg_sequences,split=False):
   s = []
   set_x_pos = convert_sequences_to_one_hot(pos_sequences)
 
@@ -318,7 +318,7 @@ def create_sets_one_hot(pos_sequences, neg_sequences,split=False):
     return [set_x, set_y, sample_dim]
 
 
-def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlapping, k=3, split=False):
+def create_sets_kmer_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlapping='overlapping', k=3, split=False):
   s = []
   ##here pos_sequences and neg_sequences are lists
   
@@ -353,6 +353,3 @@ def create_sets_emb(pos_sequences, neg_sequences, file_pos, file_neg, overlappin
     return [set_x, set_y, sample_dim]
 
 
-# create_testing_set_one_hot      = create_training_set_one_hot      = create_sets_one_hot
-# create_testing_set_emb          = create_training_set_emb          = create_sets_emb
-# create_testing_set_kmer_one_hot = create_training_set_kmer_one_hot = create_sets_kmers_one_hot

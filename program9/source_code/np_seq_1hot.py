@@ -4,7 +4,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
-from misc import read_fasta_file, create_sets_one_hot
+from misc import read_fasta_file, create_sets_seq_one_hot
 
 from models import create_cnn,cnn,classification
 
@@ -51,7 +51,7 @@ epochs      = 50
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
-train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_sets_one_hot(train_pos_sequences, train_neg_sequences, split=True)
+train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_sets_seq_one_hot(train_pos_sequences, train_neg_sequences, split=True)
 
 print ("np.shape(train_x)",np.shape(train_x_hot))
 
@@ -59,7 +59,7 @@ print (sample_dim_hot)
 
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
-test_x_hot, test_y_hot, _ = create_sets_one_hot(test_pos_sequences, test_neg_sequences)
+test_x_hot, test_y_hot, _ = create_sets_seq_one_hot(test_pos_sequences, test_neg_sequences)
 print ("np.shape(test_x_hot)",np.shape(test_x_hot))
 
 ###############################33 TRAINING################################

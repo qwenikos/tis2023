@@ -4,7 +4,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
-from misc import read_fasta_file,create_sets_emb,printd
+from misc import read_fasta_file,create_sets_kmer_emb,printd
 
 # from train import train_model
 from models import create_cnn,cnn,classification
@@ -59,7 +59,7 @@ train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_d
 file_pos=str(k) + '-mer_emb.txt'  
 file_neg=str(k) + '-mer_emb.txt' ## to check here must be right .need the same file for pos and neg
 
-train_x, train_y, val_x, val_y, sample_dim = create_sets_emb(train_pos_sequences, train_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k, split=True)
+train_x, train_y, val_x, val_y, sample_dim = create_sets_kmer_emb(train_pos_sequences, train_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k, split=True)
 printd("sample_dim",sample_dim)
 print (train_x.shape)
 # exit()
@@ -67,7 +67,7 @@ print (train_x.shape)
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
 
-test_x, test_y, _ = create_sets_emb(test_pos_sequences[0:num_te_data], test_neg_sequences[0:num_te_data], file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k)
+test_x, test_y, _ = create_sets_kmer_emb(test_pos_sequences[0:num_te_data], test_neg_sequences[0:num_te_data], file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k)
 
 ###############################33 TRAINING################################
 
