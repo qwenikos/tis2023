@@ -11,6 +11,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLRO
 from keras.models import Model
 from keras.layers import Input
 from keras.optimizers import SGD
+from keras import metrics
 import numpy as np
 
 #######################   General variable ###########################################################
@@ -33,8 +34,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 ##dataset creation
 model_type   ='cnn' 
-num_tr_data =3000
-num_te_data =3000
+num_tr_data =6000
+num_te_data =6000
 start_point = 50 ##def 60-120
 end_point   = 150
 
@@ -54,6 +55,8 @@ train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_d
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
 train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_sets_kmers_one_hot(train_pos_sequences, train_neg_sequences,overlapping=overlapping, k=k, split=True)
 
+print (train_x_hot.shape)
+# exit()
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
 test_x_hot, test_y_hot, _ = create_sets_kmers_one_hot(test_pos_sequences, test_neg_sequences,overlapping=overlapping,k=k)
@@ -91,7 +94,7 @@ model = Model(inputs=sequence_input, outputs=out)
 sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 
 # model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
-model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy"])
+model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy",metrics.Precision(), metrics.Recall()])
 
 model.fit(train_x_hot, train_y_hot, validation_data = (val_x_hot, val_y_hot), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=2)
 

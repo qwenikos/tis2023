@@ -25,11 +25,22 @@ np.random.seed(2000)
 rn.seed(2023)
 
 def cnn(input_sequence,kernel_Size=5,flt=70):
-  mode=1
+  mode=2
   print ("mode=",mode)
   print('size of input sequence', np.shape(input_sequence))
   print ("kernel_Size=",kernel_Size)
   print ("filters=",flt)
+
+  if (mode==0):
+    x = Conv1D(filters = 32, kernel_size = 5, strides = 1, padding = "same")(input_sequence)
+    x = LeakyReLU()(x)
+
+    x = Conv1D(filters = 64, kernel_size = 30, strides = 1, padding = "same")(input_sequence)
+    x = LeakyReLU()(x)
+
+
+    # x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
+    out = Flatten()(x) 
   
   if (mode==1):
     x = Conv1D(filters = flt, kernel_size = kernel_Size, strides = 1, padding = "same")(input_sequence)
@@ -43,7 +54,7 @@ def cnn(input_sequence,kernel_Size=5,flt=70):
     # x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
     out = Flatten()(x)
     
-  if (mode==3): ##vasilikis setup
+  if (mode==2): ##vasilikis setup
 
     x = Conv1D(filters = flt, kernel_size = kernel_Size, strides = 1, padding = "same")(input_sequence)
 

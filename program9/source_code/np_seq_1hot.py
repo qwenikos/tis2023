@@ -1,3 +1,4 @@
+print ("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ START $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n")
 debug=True
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -11,6 +12,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLRO
 from keras.models import Model
 from keras.layers import Input
 from keras.optimizers import SGD
+from keras import metrics
 import numpy as np
 
 #######################   General variable ###########################################################
@@ -33,10 +35,10 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =500
-num_te_data =500
-start_point = 80 ##def 60-120
-end_point   = 120
+num_tr_data =10000
+num_te_data =10000
+start_point = 50 ##def 60-120
+end_point   = 150
 model_type   ='cnn' 
 
 flt         = 25
@@ -58,6 +60,7 @@ print (sample_dim_hot)
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
 test_x_hot, test_y_hot, _ = create_sets_one_hot(test_pos_sequences, test_neg_sequences)
+print ("np.shape(test_x_hot)",np.shape(test_x_hot))
 
 ###############################33 TRAINING################################
 mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + ".hdf5",
@@ -92,7 +95,7 @@ model = Model(inputs=sequence_input, outputs=out)
 
 sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 
-model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
+model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy",metrics.Precision(), metrics.Recall()])
 
 
 model.fit(train_x_hot, train_y_hot, validation_data = (val_x_hot, val_y_hot), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=2)

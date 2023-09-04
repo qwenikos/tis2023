@@ -66,18 +66,17 @@ def clean_sequences(sequences):
 # converts the sequences into one-hot encoding sequences
 def one_hot_encoding (sequences):
 
-  one_hot_samples = np.zeros(shape = (sequences.shape[0], 4, sequences.shape[1]), dtype=np.float32)
+  one_hot_samples = np.zeros(shape = (sequences.shape[0], sequences.shape[1],4 ), dtype=np.float32)
 
   col_position=0
 
-  for (i, sequence) in enumerate(sequences):
-    for (col_position, nucleotide) in enumerate(sequence):
+  for (i, sequence) in enumerate(sequences):  ##for each sequence 
+    for (row_position, nucleotide) in enumerate(sequence): ##for each  nucleotide
 
       encoded_nuc = one_hot_conversion(nucleotide[0])
 
-      for (row_position, one_hot) in enumerate(encoded_nuc):
+      for (col_position, one_hot) in enumerate(encoded_nuc):
         one_hot_samples[i, row_position, col_position] = one_hot
-
 
   return one_hot_samples
 
@@ -89,9 +88,9 @@ def kmer_embedding(sequences, k, filename, overlapping):
 
   c_matrix, len_embvec = coocurence_matrix(filename) 
 
-  num_cols = num_of_kmers(k, sequences[0], overlapping)
+  num_rows = num_of_kmers(k, sequences[0], overlapping)
 
-  num_rows = len_embvec
+  num_cols = len_embvec
 
   kmers_emb_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
 
@@ -99,13 +98,13 @@ def kmer_embedding(sequences, k, filename, overlapping):
 
     kmers = k_mers(sequence, k, overlapping)
     
-    for (col_position, kmer) in enumerate(kmers):
+    for (row_position, kmer) in enumerate(kmers):
       if kmer in c_matrix:
         emb_vector = c_matrix[kmer]
       else:                         ##handling out of vocabulary words or "unseen words"
         emb_vector = c_matrix["<unk>"] ## the last line in vector files
 
-      for (row_position, num) in enumerate(emb_vector):
+      for (col_position, num) in enumerate(emb_vector):
 
         kmers_emb_samples[i, row_position, col_position] = num
   return kmers_emb_samples
@@ -142,20 +141,19 @@ def kmers_one_hot_encoding (sequences,overlapping, k): ## add the k in args
 
   kmersOnHotDict,kmers,one_hot_enc_kmers=np_generate_all_kmers_one_hot(k)
  
-  num_cols = num_of_kmers(k, sequences[0], overlapping) #num of kmers in sequence
-  num_rows = len(kmers) ## size of on hot encoding
+  num_rows = num_of_kmers(k, sequences[0], overlapping) #num of kmers in sequence
+  num_cols = len(kmers) ## size of on hot encoding
   
   kmers_emb_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
 
   for (i, sequence) in enumerate(sequences):
-
     kmers = k_mers(sequence, k, overlapping)
 
-    for (col_position, kmer) in enumerate(kmers):
+    for (row_position, kmer) in enumerate(kmers):
       if kmer in kmersOnHotDict:
         kmer_one_hot = kmersOnHotDict[kmer]
 
-      for (row_position, num) in enumerate(kmer_one_hot):
+      for (col_position, num) in enumerate(kmer_one_hot):
  
         kmers_emb_samples[i, row_position, col_position] = num
       
@@ -167,6 +165,7 @@ def convert_sequences_to_kmers_one_hot(sequences, overlapping, k):
   
   one_samples = kmers_one_hot_encoding(sequences,overlapping, k) ##to impement
   return one_samples
+
 
 def create_sets_kmers_one_hot(pos_sequences, neg_sequences,k,overlapping, split=False):
   s = []

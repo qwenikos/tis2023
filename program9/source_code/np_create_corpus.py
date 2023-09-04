@@ -8,9 +8,9 @@ from misc import clean_sequences, subsequences, k_mers, read_fasta_file
 
 
 
-k=3
-start_point = 60
-end_point = 140
+k=5
+start_point = 50
+end_point = 150
 
 
 overlapping="overlapping" ##choices=['overlapping', 'non-overlapping']
@@ -47,10 +47,10 @@ BUILDDIR="../glove/build"
 SAVE_FILE="vectors"
 VERBOSE="2"
 MEMORY="4.0"
-VOCAB_MIN_COUNT="5"
-VECTOR_SIZE="36"
-MAX_ITER="300"
-WINDOW_SIZE="3"
+VOCAB_MIN_COUNT="0" #5
+VECTOR_SIZE="100"  ##36
+MAX_ITER="100" #300
+WINDOW_SIZE="7" ## 3
 BINARY="2"
 NUM_THREADS="5"
 X_MAX="30000"

@@ -34,13 +34,14 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 ##>REGION_GT_50000_1_sorf_1:chr1:102467:102867:0:+
 ##CATTCTCATATGACAGATTTCAGATGGCATTCTTATTTCCCTGATTTCTTTTTGAGATAGCTTGCATTTCCCTCCTCTATATAAAGCCACCGTTTATCAAATGCCTACATGGACCAAGCAGTCCACAAGGGCTTCACAGACAGTTTTACTAAACTCATGCCAAAACTTTCAGGTTTTATACCTACCTTATAGATAAAGAAATTGAAGCTTATAGAGTTTAAGTAATGTTCCCAAAGCCTCGTGGCTAGTAATTCAAACCTAATTTCTGCCTACTCCAAAGTCTATTTTTCCTTATGATACTCTACTGCCTCTCCATGGATAAAGACAGAGATCACATATTAATAAAATTTGCACAAAGTCGGCAAATTGTTGAAAGGGAAGGCTAAGATGATTAATAAAA
 
-k = 3
+k = 4
 num_tr_data =6000      
 num_te_data =6000
-start_point = 60 ##def 60-120 works well for 0 200
-end_point   = 140
+start_point = 50 ##def 60-120 works well for 0 200
+end_point   = 150
 model_type   ='cnn' 
 
+flt         = 25
 lr          = 0.001
 batch_size  = 64
 kernel_size = 3
@@ -60,6 +61,8 @@ file_neg=str(k) + '-mer_emb.txt' ## to check here must be right .need the same f
 
 train_x, train_y, val_x, val_y, sample_dim = create_sets_emb(train_pos_sequences, train_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k, split=True)
 printd("sample_dim",sample_dim)
+print (train_x.shape)
+# exit()
 
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
