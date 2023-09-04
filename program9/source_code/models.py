@@ -25,29 +25,49 @@ np.random.seed(2000)
 rn.seed(2023)
 
 def cnn(input_sequence,kernel_Size=5,flt=70):
-  print('size of input sequence', input_sequence)
-  x = Conv1D(filters = flt, kernel_size = kernel_Size, strides = 1, padding = "same")(input_sequence)
-  x = LeakyReLU()(x)
-  # print('before batchnormalization', x.shape)
-  x = BatchNormalization(renorm=True)(x)
-  # x = MaxPooling2D(pool_size = 3, padding = "same")(x)
-  # print('after normalization', x.shape)
+  mode=1
+  print ("mode=",mode)
+  print('size of input sequence', np.shape(input_sequence))
+  print ("kernel_Size=",kernel_Size)
+  print ("filters=",flt)
+  
+  if (mode==1):
+    x = Conv1D(filters = flt, kernel_size = kernel_Size, strides = 1, padding = "same")(input_sequence)
+    x = LeakyReLU()(x)
+    x = MaxPooling1D(pool_size=2)(x)
+    
+    x = Conv1D(filters = 2*flt, kernel_size = kernel_Size, strides = 1, padding = "same")(input_sequence)
+    x = LeakyReLU()(x)
+    x = MaxPooling1D(pool_size=2)(x)
 
-  x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
+    # x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
+    out = Flatten()(x)
+    
+  if (mode==3): ##vasilikis setup
 
-  x = Conv1D(filters = flt*1.5, kernel_size = kernel_Size, strides = 1, padding = "same")(x)  ##flt=70
-  x = LeakyReLU()(x)
-  x = BatchNormalization(renorm=True)(x)
-  # x = MaxPooling2D(pool_size = 3, padding = "same")(x)
-  x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
+    x = Conv1D(filters = flt, kernel_size = kernel_Size, strides = 1, padding = "same")(input_sequence)
 
-  x = Conv1D(filters = flt*2, kernel_size = kernel_Size, strides = 1, padding = "same")(x) ##flt=100
-  x = LeakyReLU()(x)
-  x = BatchNormalization(renorm=True)(x)
-  # x = MaxPooling1D(pool_size = 2, padding = "same")(x)
-  x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x) ##flt=150
+    x = LeakyReLU()(x)
+    # print('before batchnormalization', x.shape)
+    x = BatchNormalization(renorm=True)(x)
+    # x = MaxPooling2D(pool_size = 3, padding = "same")(x)
+    # print('after normalization', x.shape)
 
-  out = Flatten()(x)
+    x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
+
+    x = Conv1D(filters = flt*1.5, kernel_size = kernel_Size, strides = 1, padding = "same")(x)  ##flt=70
+    x = LeakyReLU()(x)
+    x = BatchNormalization(renorm=True)(x)
+    # x = MaxPooling2D(pool_size = 3, padding = "same")(x)
+    x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
+
+    x = Conv1D(filters = flt*2, kernel_size = kernel_Size, strides = 1, padding = "same")(x) ##flt=100
+    x = LeakyReLU()(x)
+    x = BatchNormalization(renorm=True)(x)
+    # x = MaxPooling1D(pool_size = 2, padding = "same")(x)
+    x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x) ##flt=150
+
+    out = Flatten()(x)
 
   return out
   

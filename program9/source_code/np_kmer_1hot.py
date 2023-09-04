@@ -35,12 +35,12 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 model_type   ='cnn' 
 num_tr_data =3000
 num_te_data =3000
-start_point = 0 ##def 60-120
-end_point   = 200
+start_point = 50 ##def 60-120
+end_point   = 150
 
 
 flt         = 25
-kernel_size = 10
+kernel_size = 3
 lr          = 0.001
 batch_size  = 64
 epochs      = 10
