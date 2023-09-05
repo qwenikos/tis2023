@@ -42,7 +42,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 ##dataset creation
 
-k=4
+k1=3
+k2=4
 
 num_tr_data =17000
 num_te_data =10000
@@ -59,48 +60,57 @@ epochs      = 50
 overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
 ######################################################################################################
 
-file_pos=str(k) + '-mer_emb.txt'  
-file_neg=str(k) + '-mer_emb.txt' ## to check here must be right .need the same file for pos and neg
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
 
-train_x_seq_hot , train_y_seq_hot , val_x_seq_hot , val_y_seq_hot , sample_dim_seq_hot  = create_sets_seq_one_hot(train_pos_sequences, train_neg_sequences, split=True)
-train_x_kmer_hot, train_y_kmer_hot, val_x_kmer_hot, val_y_kmer_hot, sample_dim_kmer_hot = create_sets_kmer_one_hot(train_pos_sequences, train_neg_sequences,overlapping=overlapping,k=k, split=True)
-train_x_kmer_emb, train_y_kmer_emb, val_x_kmer_emb, val_y_kmer_emb, sample_dim_kmer_emb = create_sets_kmer_emb(train_pos_sequences, train_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k, split=True)
-
-print ("np.shape(train_x_seq_hot) ",np.shape(train_x_seq_hot))
-print ("np.shape(train_x_kmer_hot)",np.shape(train_x_kmer_hot))
-print ("np.shape(train_x_kmer_emb)",np.shape(train_x_kmer_emb))
-
-
-
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
 
-test_x_seq_hot , test_y_seq_hot , _ = create_sets_seq_one_hot(test_pos_sequences, test_neg_sequences)
-test_x_kmer_hot, test_y_kmer_hot, _ = create_sets_kmer_one_hot(test_pos_sequences, test_neg_sequences,overlapping=overlapping,k=k)
-test_x_kmer_emb, test_y_kmer_emb, _ = create_sets_kmer_emb(test_pos_sequences, test_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k)
-print ("np.shape(test_x_seq_hot) ",np.shape(test_x_seq_hot))
-print ("np.shape(test_x_kmer_hot)",np.shape(test_x_kmer_hot))
-print ("np.shape(test_x_kmer_emb)",np.shape(test_x_kmer_emb))
 
+train_x_seq_hot , train_y_seq_hot , val_x_seq_hot , val_y_seq_hot , sample_dim_seq_hot  = create_sets_seq_one_hot(train_pos_sequences, train_neg_sequences, split=True)
+test_x_seq_hot , test_y_seq_hot , _ = create_sets_seq_one_hot(test_pos_sequences, test_neg_sequences)
+
+k=k1
+file_pos=str(k) + '-mer_emb.txt'  
+file_neg=str(k) + '-mer_emb.txt' ## to check here must be right .need the same file for pos and neg
+
+train_x_kmer_hot_1, train_y_kmer_hot_1, val_x_kmer_hot_1, val_y_kmer_hot_1, sample_dim_kmer_hot_1 = create_sets_kmer_one_hot(train_pos_sequences, train_neg_sequences,overlapping=overlapping,k=k, split=True)
+train_x_kmer_emb_1, train_y_kmer_emb_1, val_x_kmer_emb_1, val_y_kmer_emb_1, sample_dim_kmer_emb_1 = create_sets_kmer_emb(train_pos_sequences, train_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k, split=True)
+
+test_x_kmer_hot_1, test_y_kmer_hot_1, _ = create_sets_kmer_one_hot(test_pos_sequences, test_neg_sequences,overlapping=overlapping,k=k)
+test_x_kmer_emb_1, test_y_kmer_emb_1, _ = create_sets_kmer_emb(test_pos_sequences, test_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k)
+
+k=k2
+file_pos=str(k) + '-mer_emb.txt'  
+file_neg=str(k) + '-mer_emb.txt' ## to check here must be right .need the same file for pos and neg
+
+train_x_kmer_hot_2, train_y_kmer_hot_2, val_x_kmer_hot_2, val_y_kmer_hot_2, sample_dim_kmer_hot_2 = create_sets_kmer_one_hot(train_pos_sequences, train_neg_sequences,overlapping=overlapping,k=k, split=True)
+train_x_kmer_emb_2, train_y_kmer_emb_2, val_x_kmer_emb_2, val_y_kmer_emb_2, sample_dim_kmer_emb_2 = create_sets_kmer_emb(train_pos_sequences, train_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k, split=True)
+
+test_x_kmer_hot_2, test_y_kmer_hot_2, _ = create_sets_kmer_one_hot(test_pos_sequences, test_neg_sequences,overlapping=overlapping,k=k)
+test_x_kmer_emb_2, test_y_kmer_emb_2, _ = create_sets_kmer_emb(test_pos_sequences, test_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k)
 
 
 input1=Input(shape = (sample_dim_seq_hot[0], sample_dim_seq_hot[1]))
 out1 = cnn(input1,kernel_size,flt)
 
-input2=Input(shape = (sample_dim_kmer_hot[0], sample_dim_kmer_hot[1]))
+input2=Input(shape = (sample_dim_kmer_hot_1[0], sample_dim_kmer_hot_1[1]))
 out2 = cnn(input2,kernel_size,flt)
 
-input3=Input(shape = (sample_dim_kmer_emb[0], sample_dim_kmer_emb[1]))
+input3=Input(shape = (sample_dim_kmer_emb_1[0], sample_dim_kmer_emb_1[1]))
 out3 = cnn(input3,kernel_size,flt)
 
-x = concatenate([out1, out2,out3])
+input4=Input(shape = (sample_dim_kmer_hot_2[0], sample_dim_kmer_hot_2[1]))
+out4 = cnn(input4,kernel_size,flt)
+
+input5=Input(shape = (sample_dim_kmer_emb_2[0], sample_dim_kmer_emb_2[1]))
+out5 = cnn(input5,kernel_size,flt)
+
+x = concatenate([out1, out2, out3, out4, out5])
 
 # out = Dense(128, activation='relu')(merged)
 print ("x.shape",x.shape)
-
 
 
 out = Dense(units = sqrt(x.shape[1]))(x)
@@ -115,7 +125,7 @@ out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
 
 out = Dense(units = 1, activation = "sigmoid")(out) 
  
-model = tf.keras.Model(inputs=[input1,input2,input3], outputs=out)
+model = tf.keras.Model(inputs=[input1,input2,input3,input4,input5], outputs=out)
 # model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy",metrics.Precision(), metrics.Recall()])
 model.summary()
@@ -130,16 +140,16 @@ csv_logger = CSVLogger('results' + "/CNNonRaw_" + str(os.getpid()) + ".log.csv",
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, cooldown=1,min_lr=0.00001)
 
 
-
-train_data_x=[train_x_seq_hot, train_x_kmer_hot, train_x_kmer_emb]
+train_data_x=[train_x_seq_hot, train_x_kmer_hot_1, train_x_kmer_emb_1,train_x_kmer_hot_2, train_x_kmer_emb_2]
 train_data_y=train_y_seq_hot
-val_data_x=[val_x_seq_hot, val_x_kmer_hot, val_x_kmer_emb]
+val_data_x=[val_x_seq_hot, val_x_kmer_hot_1, val_x_kmer_emb_1, val_x_kmer_hot_2, val_x_kmer_emb_2]
 val_data_y=val_y_seq_hot
 
 
 model.fit(train_data_x, train_data_y, validation_data=(val_data_x,val_data_y),shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=2)
 
-test_data_x = [test_x_seq_hot,test_x_kmer_hot ,test_x_kmer_emb]
+test_data_x = [test_x_seq_hot,test_x_kmer_hot_1 ,test_x_kmer_emb_1,test_x_kmer_hot_2 ,test_x_kmer_emb_2]
 test_data_y = test_y_seq_hot
+
 tresults = model.evaluate(test_data_x,test_data_y, batch_size = batch_size, verbose = 1, sample_weight = None)	
 print  (tresults)

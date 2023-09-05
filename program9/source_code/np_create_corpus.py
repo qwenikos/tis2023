@@ -8,7 +8,7 @@ from misc import clean_sequences, subsequences, k_mers, read_fasta_file
 
 
 
-k=5
+k=9
 start_point = 50
 end_point = 150
 
@@ -16,6 +16,7 @@ end_point = 150
 overlapping="overlapping" ##choices=['overlapping', 'non-overlapping']
 
 train_pos="../datasets/training/positive/positive_trainingSet_Flank-100.fa"
+train_pos="../datasets/training/positive/both_positive_trainingSet_Flank-100.fa"
 train_pos_sequences = read_fasta_file(train_pos,start_point,end_point)
 
 subseqs = subsequences(train_pos_sequences)
