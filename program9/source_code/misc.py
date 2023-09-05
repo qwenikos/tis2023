@@ -349,4 +349,5 @@ def k_mers(sequence, k, overlapping):
 
 
 ################################## GC content ###############################################
-def create_sets_seq_GC()
+def create_sets_seq_GC():
+  return -1
