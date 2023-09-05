@@ -44,8 +44,8 @@ k=4
 
 num_tr_data =10000
 num_te_data =10000
-start_point = 50 ##def 60-120
-end_point   = 150
+start_point = 0 ##def 60-120
+end_point   = 200
 
 
 model_type   ='cnn' 
@@ -77,7 +77,7 @@ test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
 
 test_x_seq_hot , test_y_seq_hot , _ = create_sets_seq_one_hot(test_pos_sequences, test_neg_sequences)
-test_x_kmer_hot, test_y_kmer_hot, _ = create_sets_kmer_one_hot(test_pos_sequences, test_neg_sequences)
+test_x_kmer_hot, test_y_kmer_hot, _ = create_sets_kmer_one_hot(test_pos_sequences, test_neg_sequences,overlapping=overlapping,k=k)
 test_x_kmer_emb, test_y_kmer_emb, _ = create_sets_kmer_emb(test_pos_sequences, test_neg_sequences, file_pos=file_pos, file_neg=file_neg, overlapping=overlapping, k=k)
 print ("np.shape(test_x_seq_hot) ",np.shape(test_x_seq_hot))
 print ("np.shape(test_x_kmer_hot)",np.shape(test_x_kmer_hot))
@@ -147,7 +147,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, cooldow
 
 
 
-train_data_x=[train_x_seq_hot, train_x_kmer_hot, train_x_kmer_emb ]
+train_data_x=[train_x_seq_hot, train_x_kmer_hot, train_x_kmer_emb]
 train_data_y=train_y_seq_hot
 val_data_x=[val_x_seq_hot, val_x_kmer_hot, val_x_kmer_emb]
 val_data_y=val_y_seq_hot
@@ -155,6 +155,7 @@ val_data_y=val_y_seq_hot
 
 model.fit(train_data_x, train_data_y, validation_data=(val_data_x,val_data_y),shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=2)
 
-test_data=[test_x_seq_hot,test_x_kmer_hot ,test_x_kmer_emb ]
-tresults = model.evaluate(test_data, test_y_seq_hot, batch_size = batch_size, verbose = 1, sample_weight = None)	
+test_data_x = [test_x_seq_hot,test_x_kmer_hot ,test_x_kmer_emb]
+test_data_y = test_y_seq_hot
+tresults = model.evaluate(test_data_x,test_data_y, batch_size = batch_size, verbose = 1, sample_weight = None)	
 print  (tresults)
