@@ -3,7 +3,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
-from misc import read_fasta_file,create_sets_kmers_one_hot
+from misc import read_fasta_file,create_sets_kmer_one_hot
 
 from models import cnn,classification
 

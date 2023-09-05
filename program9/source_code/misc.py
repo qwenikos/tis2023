@@ -351,3 +351,54 @@ def k_mers(sequence, k, overlapping):
 ################################## GC content ###############################################
 def create_sets_seq_GC():
   return -1
+
+def create_sets_seq_GC(pos_sequences, neg_sequences,window_size=5,split=False):
+  s = []
+  set_x_pos = convert_sequences_to_GC(pos_sequences,window_size)
+
+  set_x_neg = convert_sequences_to_GC(neg_sequences,window_size)
+
+  set_x = np.concatenate((set_x_pos, set_x_neg)) 
+
+  set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
+  set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)
+
+  set_y = np.concatenate((set_y_pos, set_y_neg)) 
+  
+  sample_dim = [set_x.shape[1], set_x.shape[2]] 
+
+  if split == True:
+    train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=False, test_size=0.33)  ##np make shuffle==False
+
+    sample_dim = [set_x.shape[1], set_x.shape[2]] 
+
+    train_x, train_y = shuffle(train_x, train_y)
+    val_x, val_y = shuffle(val_x, val_y)
+
+    return [train_x, train_y, val_x, val_y, sample_dim]
+  
+  else:
+    set_x, set_y = shuffle(set_x, set_y)
+
+    return [set_x, set_y, sample_dim]
+
+def convert_sequences_to_GC(sequences,window_size):
+  encoded_sequences=[]
+  for sequence in sequences:
+    encoded_sequence = []
+    for i in range(len(sequence) - window_size + 1):
+      window = sequence[i:i + window_size]
+      g_count = window.count('G')
+      encoded_sequence.append(g_count)
+    encoded_sequences.append(encoded_sequence)
+  encoded_sequences=np.array([list(encoded_sequence) for encoded_sequence in encoded_sequences]) ##added to convert list to nparray of nts  
+  encoded_sequences.reshape(encoded_sequences.shape[0],encoded_sequences.shape[1],1)
+  print (encoded_sequences)
+  print (encoded_sequences.shape)
+  encoded_sequences = encoded_sequences.reshape(-1,encoded_sequences.shape[1],1) # Reshaped to Batch, Seq, Dim
+  print (encoded_sequences.shape)
+  # exit()
+
+  return encoded_sequences
+
+

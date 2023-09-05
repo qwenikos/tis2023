@@ -24,6 +24,19 @@ np.random.seed(2000)
 # Necessary for starting core Python generated random numbers in a well-defined state.
 rn.seed(2023)
 
+def cnn1(input_sequence,kernel_Size=5,flt=70):
+  print('size of input sequence', np.shape(input_sequence))
+  print ("kernel_Size=",kernel_Size)
+  print ("filters=",flt)
+
+  x = Conv1D(filters = 32, kernel_size = 5, strides = 1, padding = "same")(input_sequence)
+  x = LeakyReLU()(x)
+  x = Conv1D(filters = 64, kernel_size = 30, strides = 1, padding = "same")(input_sequence)
+  x = LeakyReLU()(x)
+    # x = Dropout(rate = 0.2, noise_shape = None, seed = None)(x)
+  out = Flatten()(x) 
+  return out
+
 def cnn(input_sequence,kernel_Size=5,flt=70):
   mode=2
   print ("mode=",mode)
