@@ -91,7 +91,7 @@ out = classification(out)
 
 model = Model(inputs=sequence_input, outputs=out)
 
-sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
+# sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 
 # model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
 model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy",metrics.Precision(), metrics.Recall()])
