@@ -6,7 +6,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
 from misc import read_fasta_file, create_sets_seq_one_hot
 
-from models import create_cnn,cnn,classification
+from models import create_cnn,cnn,classification,DeepRfam
 
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
 from keras.models import Model
@@ -37,8 +37,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 ##dataset creation
 num_tr_data =10000
 num_te_data =10000
-start_point = 50 ##def 60-120
-end_point   = 150
+start_point = 40 ##def 60-120
+end_point   = 160
 model_type   ='cnn' 
 
 flt         = 25
@@ -85,15 +85,17 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 
 print (sample_dim_hot[0], sample_dim_hot[1])
 
-sequence_input=Input(shape = (sample_dim_hot[0], sample_dim_hot[1]))
+sequence_input=Input(shape = (sample_dim_hot[0], sample_dim_hot[1],1))
 # exit()
+
+
 out = cnn(sequence_input,kernel_size,flt)
-
 out = classification(out)
-
 model = Model(inputs=sequence_input, outputs=out)
 
-sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
+# model = DeepRfam(sample_dim_hot[0], sample_dim_hot[1])
+
+# sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
 
 model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy",metrics.Precision(), metrics.Recall()])
 

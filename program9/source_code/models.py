@@ -9,7 +9,7 @@ from math import sqrt
 import os
 
 
-from keras.layers import Dense, Dropout, Flatten, Conv1D, MaxPooling1D, BatchNormalization, ZeroPadding1D, ZeroPadding2D,Conv2D,MaxPooling2D
+from keras.layers import Dense, Dropout, Flatten, Conv1D, MaxPooling1D, BatchNormalization, ZeroPadding1D, ZeroPadding2D,Conv2D,MaxPooling2D,concatenate
 from keras.layers import LeakyReLU
 from keras.optimizers import SGD
 from keras.models import Model
@@ -23,6 +23,33 @@ np.random.seed(2000)
 
 # Necessary for starting core Python generated random numbers in a well-defined state.
 rn.seed(2023)
+
+def DeepRfam(seq_length,num_c, num_filters=256,
+             filter_sizes=[24, 36, 48, 60, 72, 84, 96, 108],
+             dropout_rate=0.5, num_classes=143, num_hidden=512):
+    # initialization
+    in_shape = (seq_length, num_c, 1)
+
+    input_shape = Input(shape=in_shape)
+    #     input_shape = Input(shape = (312, 4, 1))
+
+    pooled_outputs = []
+    for i in range(len(filter_sizes)):
+        # print (seq_length,num_c, filter_sizes[i])
+        conv = Conv2D(num_filters, (filter_sizes[i], num_c), padding='valid', activation='relu')(input_shape)
+        # print ("(*)")
+        pool = MaxPooling2D((seq_length - filter_sizes[i] + 1, 1), padding='valid')(conv)
+        pooled_outputs.append(pool)
+
+    merge = concatenate(pooled_outputs)
+
+    x = Flatten()(merge)
+    x = Dropout(dropout_rate)(x)
+    x = Dense(num_hidden, activation='relu')(x)
+    out = Dense(num_classes, activation='softmax')(x)
+
+    model = Model(input_shape, out)
+    return model
 
 def cnn1(input_sequence,kernel_Size=5,flt=70):
   print('size of input sequence', np.shape(input_sequence))
