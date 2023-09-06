@@ -26,12 +26,10 @@ rn.seed(2023)
 
 def DeepRfam(seq_length,num_c, num_filters=256,
              filter_sizes=[24, 36, 48, 60, 72, 84, 96, 108],
-             dropout_rate=0.5, num_classes=143, num_hidden=512):
+             dropout_rate=0.5, num_classes=1, num_hidden=512):
     # initialization
-    in_shape = (seq_length, num_c, 1)
 
-    input_shape = Input(shape=in_shape)
-    #     input_shape = Input(shape = (312, 4, 1))
+    input_shape = Input(shape=(seq_length, num_c, 1))  #  input_shape = Input(shape = (100, 4, 1))
 
     pooled_outputs = []
     for i in range(len(filter_sizes)):
@@ -47,8 +45,21 @@ def DeepRfam(seq_length,num_c, num_filters=256,
     x = Dropout(dropout_rate)(x)
     x = Dense(num_hidden, activation='relu')(x)
     out = Dense(num_classes, activation='softmax')(x)
+    out = Dense(num_classes, activation='sigmoid')(x)
 
     model = Model(input_shape, out)
+    
+  #   out = Dense(units = sqrt(x.shape[1]))(x)
+  #   out = LeakyReLU()(out)
+  #   out = BatchNormalization()(out)
+  #   out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
+  #   # # #out = Dense(units = 50, kernel_initializer = "he_normal", kernel_regularizer = regularizers.l2(0.00001))(out)
+  #   out = Dense(units = sqrt(out.shape[1]))(out)
+  #   out = LeakyReLU()(out)
+  #   out = BatchNormalization()(out)
+  #   out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
+
+  # out = Dense(units = 1, activation = "sigmoid")(out)  
     return model
 
 def cnn1(input_sequence,kernel_Size=5,flt=70):
@@ -227,34 +238,6 @@ def classification(x):
   out = LeakyReLU()(out)
   out = BatchNormalization()(out)
   out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
-  # out = Dense(units = 150)(out)
-  # out = LeakyReLU()(out)
-  # out = BatchNormalization()(out)
-  # out = Dropout(rate = 0.25, noise_shape = None, seed = None)(out)
-  # out = Dense(units = 50)(out)
-  # out = LeakyReLU()(out)
-  # out = BatchNormalization()(out)
-  # out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
-  # out = Dense(units = 50)(out)
-  # out = LeakyReLU()(out)
-  # out = BatchNormalization()(out)
-  # out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
-  # out = Dense(units = 50)(out)
-  # out = LeakyReLU()(out)
-  # out = BatchNormalization()(out)
-  # out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
-  # out = Dense(units = 100)(out)
-  # out = LeakyReLU()(out)
-  # out = BatchNormalization()(out)
-  # out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
-  # out = Dense(units = 75)(x)
-  # out = LeakyReLU()(out)
-  # out = BatchNormalization()(out)
-  # out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
-  # out = Dense(units = 50)(out)
-  # out = LeakyReLU()(out)
-  # out = BatchNormalization()(out)
-  # out = Dropout(rate = 0.2, noise_shape = None, seed = None)(out)
 
   out = Dense(units = 1, activation = "sigmoid")(out)  
 

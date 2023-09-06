@@ -35,8 +35,8 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 
 
 ##dataset creation
-num_tr_data =100
-num_te_data =100
+num_tr_data =10000
+num_te_data =10000
 start_point = 40 ##def 60-120
 end_point   = 160
 model_type   ='cnn' 
@@ -85,20 +85,10 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 
 print (sample_dim_hot[0], sample_dim_hot[1])
 
-sequence_input=Input(shape = (sample_dim_hot[0], sample_dim_hot[1],1))
-# exit()
-
-
-# out = cnn(sequence_input,kernel_size,flt)
-# out = classification(out)
-# model = Model(inputs=sequence_input, outputs=out)
 
 model = DeepRfam(sample_dim_hot[0], sample_dim_hot[1])
 
-# sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
-
 model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy",metrics.Precision(), metrics.Recall()])
-
 
 model.fit(train_x_hot, train_y_hot, validation_data = (val_x_hot, val_y_hot), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=2)
 
