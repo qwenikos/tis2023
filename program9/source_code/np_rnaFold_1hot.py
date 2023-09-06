@@ -1,12 +1,11 @@
-print ("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ START $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n")
 debug=True
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 
-from misc import read_fasta_file, create_sets_seq_one_hot
+from misc import read_fasta_file,create_sets_kmer_one_hot
 
-from models import create_cnn,cnn,classification,DeepRfam
+from models import cnn,classification
 
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, ReduceLROnPlateau
 from keras.models import Model
@@ -33,44 +32,45 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 ##>REGION_GT_50000_1_sorf_1:chr1:102467:102867:0:+
 ##CATTCTCATATGACAGATTTCAGATGGCATTCTTATTTCCCTGATTTCTTTTTGAGATAGCTTGCATTTCCCTCCTCTATATAAAGCCACCGTTTATCAAATGCCTACATGGACCAAGCAGTCCACAAGGGCTTCACAGACAGTTTTACTAAACTCATGCCAAAACTTTCAGGTTTTATACCTACCTTATAGATAAAGAAATTGAAGCTTATAGAGTTTAAGTAATGTTCCCAAAGCCTCGTGGCTAGTAATTCAAACCTAATTTCTGCCTACTCCAAAGTCTATTTTTCCTTATGATACTCTACTGCCTCTCCATGGATAAAGACAGAGATCACATATTAATAAAATTTGCACAAAGTCGGCAAATTGTTGAAAGGGAAGGCTAAGATGATTAATAAAA
 
-
 ##dataset creation
-num_tr_data =10000
-num_te_data =10000
-start_point = 40 ##def 60-120
-end_point   = 160
 model_type   ='cnn' 
+num_tr_data =6000
+num_te_data =6000
+start_point = 50 ##def 60-120
+end_point   = 150
+
 
 flt         = 25
-kernel_size = 5
+kernel_size = 3
 lr          = 0.001
 batch_size  = 64
-epochs      = 50 
+epochs      = 10
+k=3
+overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
 
 ######################################################################################################
+### create kmers Dictionary
 
 train_pos_sequences = read_fasta_file(train_pos, start_point,end_point, num_tr_data) ##num_tr_data <>0 then return num_tr RANDOM samples.
 train_neg_sequences = read_fasta_file(train_neg, start_point,end_point, num_tr_data)
-train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_sets_seq_one_hot(train_pos_sequences, train_neg_sequences, split=True)
+train_x_hot, train_y_hot, val_x_hot, val_y_hot, sample_dim_hot = create_sets_kmer_one_hot(train_pos_sequences, train_neg_sequences,overlapping=overlapping, k=k, split=True)
 
-print ("np.shape(train_x)",np.shape(train_x_hot))
-
-print (sample_dim_hot)
-
+print (train_x_hot.shape)
+# exit()
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
-test_x_hot, test_y_hot, _ = create_sets_seq_one_hot(test_pos_sequences, test_neg_sequences)
-print ("np.shape(test_x_hot)",np.shape(test_x_hot))
+test_x_hot, test_y_hot, _ = create_sets_kmer_one_hot(test_pos_sequences[0:num_te_data], test_neg_sequences[0:num_te_data],overlapping=overlapping,k=k)
 
 ###############################33 TRAINING################################
 mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + ".hdf5",
 				verbose = 0,
 				save_best_only = True)
 
+
 earlystopper = EarlyStopping(monitor = 'val_loss', 
 					patience = 10,
-					min_delta = 0.0001,
-					verbose = 2,
+					min_delta = 0,
+					verbose = 1,
 					mode = 'auto')
 
 csv_logger = CSVLogger('results' + "/CNNonRaw_" + str(os.getpid()) + ".log.csv", 
@@ -83,21 +83,22 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 								cooldown=1,
 								min_lr=0.00001)
 
-print (sample_dim_hot[0], sample_dim_hot[1])
+sequence_input=Input(shape = (sample_dim_hot[0], sample_dim_hot[1]))
 
- 
-num_filters=256
-filter_sizes =[24, 36, 48, 60, 72, 84, 96, 108]
-filter_sizes =[4, 10, 16, 22, 28, 34, 40, 46, 24, 36, 48, 60, 72, 84, 96, 108]
+out = cnn(sequence_input,kernel_size,flt)
 
-model = DeepRfam(sample_dim_hot[0], sample_dim_hot[1],num_filters,filter_sizes)
+out = classification(out)
 
+model = Model(inputs=sequence_input, outputs=out)
+
+# sgd = SGD(learning_rate = lr, decay = 1e-6, momentum = 0.9, nesterov = True)
+
+# model.compile(loss = "binary_crossentropy", optimizer=sgd, metrics = ["accuracy"])
 model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy",metrics.Precision(), metrics.Recall()])
 
 model.fit(train_x_hot, train_y_hot, validation_data = (val_x_hot, val_y_hot), shuffle=True, epochs=epochs, batch_size=batch_size, callbacks = [earlystopper, csv_logger, mcp, reduce_lr], verbose=2)
 
-model.save('results/saved_model_np_seq_1hot.h5')
-
+model.save('results/saved_model_np_kmer_1hot.h5')
 print("\n\t\t\t\tEvaluation: [loss, acc]\n")
 tresults = model.evaluate(test_x_hot, test_y_hot, batch_size = batch_size, verbose = 1, sample_weight = None)	
 print(tresults)
