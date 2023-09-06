@@ -24,9 +24,9 @@ np.random.seed(2000)
 # Necessary for starting core Python generated random numbers in a well-defined state.
 rn.seed(2023)
 
-def DeepRfam(seq_length,num_c, num_filters=256,
-             filter_sizes=[24, 36, 48, 60, 72, 84, 96, 108],
-             dropout_rate=0.5, num_classes=1, num_hidden=512):
+def DeepRfam(seq_length,num_c, num_filters=256,filter_sizes=[24, 36, 48, 60, 72, 84, 96, 108],dropout_rate=0.5, num_classes=1, num_hidden=512):
+    
+    
     # initialization
 
     input_shape = Input(shape=(seq_length, num_c, 1))  #  input_shape = Input(shape = (100, 4, 1))

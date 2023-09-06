@@ -85,8 +85,12 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
 
 print (sample_dim_hot[0], sample_dim_hot[1])
 
+ 
+num_filters=256
+filter_sizes =[24, 36, 48, 60, 72, 84, 96, 108]
+filter_sizes =[4, 10, 16, 22, 28, 34, 40, 46, 24, 36, 48, 60, 72, 84, 96, 108]
 
-model = DeepRfam(sample_dim_hot[0], sample_dim_hot[1])
+model = DeepRfam(sample_dim_hot[0], sample_dim_hot[1],num_filters,filter_sizes)
 
 model.compile(loss = "binary_crossentropy", optimizer='adam', metrics = ["accuracy",metrics.Precision(), metrics.Recall()])
 
