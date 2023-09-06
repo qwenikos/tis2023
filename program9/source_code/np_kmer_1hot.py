@@ -59,7 +59,7 @@ print (train_x_hot.shape)
 # exit()
 test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
 test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
-test_x_hot, test_y_hot, _ = create_sets_kmer_one_hot(test_pos_sequences[0:num_te_data], test_neg_sequences[0:num_te_data],overlapping=overlapping,k=k)
+test_x_hot, test_y_hot, _ = create_sets_kmer_one_hot(test_pos_sequences, test_neg_sequences,overlapping=overlapping,k=k)
 
 ###############################33 TRAINING################################
 mcp = ModelCheckpoint(filepath = 'results' + "/CNNonRaw_" + str(os.getpid()) + ".hdf5",

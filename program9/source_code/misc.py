@@ -349,8 +349,6 @@ def k_mers(sequence, k, overlapping):
 
 
 ################################## GC content ###############################################
-def create_sets_seq_GC():
-  return -1
 
 def create_sets_seq_GC(pos_sequences, neg_sequences,window_size=5,split=False):
   s = []
@@ -401,4 +399,39 @@ def convert_sequences_to_GC(sequences,window_size):
 
   return encoded_sequences
 
+######################################################## rnaFold ################################################
 
+def create_sets_rnaFold_one_hot(pos_sequences, neg_sequences,split=False):
+  s = []
+  set_x_pos = convert_sequences_to_rnaFold(pos_sequences)
+
+  set_x_neg = convert_sequences_to_rnaFold(neg_sequences)
+
+  set_x = np.concatenate((set_x_pos, set_x_neg)) 
+
+  set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
+  set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)
+
+  set_y = np.concatenate((set_y_pos, set_y_neg)) 
+  
+  sample_dim = [set_x.shape[1], set_x.shape[2]] 
+
+  if split == True:
+    train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=False, test_size=0.33)  ##np make shuffle==False
+
+    sample_dim = [set_x.shape[1], set_x.shape[2]] 
+
+    train_x, train_y = shuffle(train_x, train_y)
+    val_x, val_y = shuffle(val_x, val_y)
+
+    return [train_x, train_y, val_x, val_y, sample_dim]
+  
+  else:
+    set_x, set_y = shuffle(set_x, set_y)
+
+    return [set_x, set_y, sample_dim]
+  
+  def convert_sequences_to_rnaFold(pos_sequences):
+    return -1
+  
+  
