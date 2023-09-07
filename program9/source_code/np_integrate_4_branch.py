@@ -48,7 +48,7 @@ k2=4
 num_tr_data =17000
 num_te_data =10000
 start_point = 0 ##def 60-120
-end_point   = 200
+end_point   = 300
 
 
 model_type   ='cnn' 

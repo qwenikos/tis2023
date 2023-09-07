@@ -12,8 +12,11 @@ import random as rn
 np.random.seed(2000)
 rn.seed(2023)
 
-#################################### General Use #####################################
 
+#################################### General Use #####################################
+def exitd():
+  print ("\n$$$$$$ EXIT $$$$$$$$\n")
+  exit()
 #########
 def printd(*args):
     if debug:
@@ -431,7 +434,22 @@ def create_sets_rnaFold_one_hot(pos_sequences, neg_sequences,split=False):
 
     return [set_x, set_y, sample_dim]
   
-  def convert_sequences_to_rnaFold(pos_sequences):
-    return -1
   
-  
+def convert_sequences_to_rnaFold(sequences):
+  import RNA
+  dot_bracket_sequences=[]
+  for sequence in sequences:
+    sequence.replace("T","U") ##convert to RNA
+    (seq, mfe) = RNA.fold(sequence)
+    dot_bracket_sequences+=[seq]
+
+  symbol_to_numeric = {'.': 0, '(': 1, ')': 2}
+  numeric_sequences = [[symbol_to_numeric[symbol] for symbol in seq] for seq in dot_bracket_sequences]
+  max_sequence_length = max(len(seq) for seq in numeric_sequences)
+  padded_sequences = [seq + [0] * (max_sequence_length - len(seq)) for seq in numeric_sequences] ##make same size if diff
+  numeric_sequences = np.array(padded_sequences)
+  num_symbols = len(symbol_to_numeric) 
+  rna_one_hot_sequences = np.zeros((numeric_sequences.shape[0], max_sequence_length, num_symbols), dtype=np.float32)
+  for i, seq in enumerate(numeric_sequences):
+    rna_one_hot_sequences[i, np.arange(len(seq)), seq] = 1
+  return rna_one_hot_sequences
