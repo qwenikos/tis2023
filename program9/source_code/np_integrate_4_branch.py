@@ -14,6 +14,8 @@ from keras.layers import Input
 from keras.optimizers import SGD
 from keras import metrics
 from math import sqrt
+import os
+import datetime
 
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Conv1D, MaxPooling1D, Flatten, Dense, concatenate, Dropout,LeakyReLU,BatchNormalization
@@ -153,3 +155,14 @@ test_data_y = test_y_seq_hot
 
 tresults = model.evaluate(test_data_x,test_data_y, batch_size = batch_size, verbose = 1, sample_weight = None)	
 print  (tresults)
+
+script_filename = os.path.splitext(os.path.basename(__file__))[0]
+current_datetime = datetime.datetime.now()
+date_time_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+output_filename = f"{script_filename}_{date_time_str}_start_point-{str(start_point)}_end_point-{str(end_point)}_k1-{str(k1)}_k3-{str(k2)}.h5"
+model.save("results/"+output_filename)
+output_filename_txt = f"{script_filename}_{date_time_str}_start_point-{str(start_point)}_end_point-{str(end_point)}_k1-{str(k1)}_k3-{str(k2)}.txt"
+outFileTxt=open("results/"+output_filename_txt,"w")
+outFileTxt.write(f"loss\t{tresults[0]}\naccuracy\t{tresults[1]}\nprecision \t{tresults[2]}\nrecall\t{tresults[3]}\n")
+# outFileTxt.write(str(tresults))
+outFileTxt.close()

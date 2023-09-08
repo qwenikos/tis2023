@@ -3,14 +3,15 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = "-1" ## tell to use cpu
 import sys
 import argparse
+import numpy as np
 
-from misc import clean_sequences, subsequences, k_mers, read_fasta_file
+from misc import k_mers, read_fasta_file
 
 
 
-k=9
-start_point = 50
-end_point = 150
+k=5
+start_point = 0
+end_point = 300
 
 
 overlapping="overlapping" ##choices=['overlapping', 'non-overlapping']
@@ -19,16 +20,15 @@ train_pos="../datasets/training/positive/positive_trainingSet_Flank-100.fa"
 train_pos="../datasets/training/positive/both_positive_trainingSet_Flank-100.fa"
 train_pos_sequences = read_fasta_file(train_pos,start_point,end_point)
 
-subseqs = subsequences(train_pos_sequences)
-subseqs = clean_sequences(subseqs)
+sequences=np.array([list(sequence) for sequence in train_pos_sequences])
 
 outFileName = 'corpus_text.txt'
 
 f = open(outFileName,'w')
 
-for subseq in subseqs.T:
+for sequence in sequences:
 
-    kmers = k_mers(subseq, k, overlapping)
+    kmers = k_mers(sequence, k, overlapping)
 
     for kmer in kmers:
         f.write(kmer)
