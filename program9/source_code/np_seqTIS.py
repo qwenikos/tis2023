@@ -33,6 +33,7 @@ test_neg="../datasets/testing/negative/negative_testingSet_Flank-100.fa"
 ##>REGION_GT_50000_1_sorf_1:chr1:102467:102867:0:+
 ##CATTCTCATATGACAGATTTCAGATGGCATTCTTATTTCCCTGATTTCTTTTTGAGATAGCTTGCATTTCCCTCCTCTATATAAAGCCACCGTTTATCAAATGCCTACATGGACCAAGCAGTCCACAAGGGCTTCACAGACAGTTTTACTAAACTCATGCCAAAACTTTCAGGTTTTATACCTACCTTATAGATAAAGAAATTGAAGCTTATAGAGTTTAAGTAATGTTCCCAAAGCCTCGTGGCTAGTAATTCAAACCTAATTTCTGCCTACTCCAAAGTCTATTTTTCCTTATGATACTCTACTGCCTCTCCATGGATAAAGACAGAGATCACATATTAATAAAATTTGCACAAAGTCGGCAAATTGTTGAAAGGGAAGGCTAAGATGATTAATAAAA
 
+input_fasta="../datasets/testing/positive/positive_testingSet_Flank-100.fa"
 
 ##dataset creation
 
@@ -54,8 +55,9 @@ epochs      = 50
 overlapping = 'overlapping'  ##default='non-overlapping', choices=['overlapping', 'non-overlapping'], help="if the kmers are overlapping")
 ######################################################################################################
 
-test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
-test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
+# test_pos_sequences = read_fasta_file(test_pos,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
+input = read_fasta_file(input_fasta,start_point,end_point, num_te_data) ##num_tr_data <>0 then return num_tr RANDOM samples. return a list
+# test_neg_sequences = read_fasta_file(test_neg,start_point,end_point, num_te_data)
 
 print ("&&&&")
 
