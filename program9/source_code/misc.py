@@ -62,6 +62,9 @@ def read_fasta_file (input_file,start_point,end_point, num_samples=0):
 
 
  ########################################## Sequence On hot encoding ########################################### 
+
+
+
 def create_sets_seq_one_hot(pos_sequences, neg_sequences,split=False):
   s = []
   set_x_pos = convert_sequences_to_one_hot(pos_sequences)
@@ -268,11 +271,11 @@ def create_sets_kmer_emb(pos_sequences, neg_sequences, file_pos, file_neg, overl
 
     return [set_x, set_y, sample_dim]
   
-def convert_sequences_to_embedding(sequences, k, overlapping, filename=''):
+def convert_sequences_to_embedding(sequences, k, overlapping, file_pos=''):
   ##here sequences are lists
   sequences=np.array([list(sequence) for sequence in sequences]) ##added to convert list to nparray of nts
   
-  kmer_emb = kmer_embedding(sequences, k, filename, overlapping)
+  kmer_emb = kmer_embedding(sequences, k, file_pos, overlapping)
   return kmer_emb
 
 
