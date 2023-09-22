@@ -456,3 +456,205 @@ def convert_sequences_to_rnaFold(sequences):
   for i, seq in enumerate(numeric_sequences):
     rna_one_hot_sequences[i, np.arange(len(seq)), seq] = 1
   return rna_one_hot_sequences
+
+
+###################################  aa-1hot  #############################
+codonDNA_to_amino_acid = {
+    "TTT": "F",  # Phenylalanine
+    "TTC": "F",  # Phenylalanine
+    "TTA": "L",  # LeTcine
+    "TTG": "L",  # LeTcine
+    "CTT": "L",  # LeTcine
+    "CTC": "L",  # LeTcine
+    "CTA": "L",  # LeTcine
+    "CTG": "L",  # LeTcine
+    "ATT": "I",  # IsoleTcine
+    "ATC": "I",  # IsoleTcine
+    "ATA": "I",  # IsoleTcine
+    "ATG": "M",  # Methionine (Start codon)
+    "GTT": "V",  # Valine
+    "GTC": "V",  # Valine
+    "GTA": "V",  # Valine
+    "GTG": "V",  # Valine
+    "TCT": "S",  # Serine
+    "TCC": "S",  # Serine
+    "TCA": "S",  # Serine
+    "TCG": "S",  # Serine
+    "CCT": "P",  # Proline
+    "CCC": "P",  # Proline
+    "CCA": "P",  # Proline
+    "CCG": "P",  # Proline
+    "ACT": "T",  # Threonine
+    "ACC": "T",  # Threonine
+    "ACA": "T",  # Threonine
+    "ACG": "T",  # Threonine
+    "GCT": "A",  # Alanine
+    "GCC": "A",  # Alanine
+    "GCA": "A",  # Alanine
+    "GCG": "A",  # Alanine
+    "TAT": "Y",  # Tyrosine
+    "TAC": "Y",  # Tyrosine
+    "TAA": "*",  # Stop codon (Ochre)
+    "TAG": "*",  # Stop codon (Amber)
+    "CAT": "H",  # Histidine
+    "CAC": "H",  # Histidine
+    "CAA": "Q",  # GlTtamine
+    "CAG": "Q",  # GlTtamine
+    "AAT": "N",  # Asparagine
+    "AAC": "N",  # Asparagine
+    "AAA": "K",  # Lysine
+    "AAG": "K",  # Lysine
+    "GAT": "D",  # Aspartic Acid
+    "GAC": "D",  # Aspartic Acid
+    "GAA": "E",  # GlTtamic Acid
+    "GAG": "E",  # GlTtamic Acid
+    "TGT": "C",  # Cysteine
+    "TGC": "C",  # Cysteine
+    "TGA": "*",  # Stop codon (Opal)
+    "TGG": "W",  # Tryptophan
+    "CGT": "R",  # Arginine
+    "CGC": "R",  # Arginine
+    "CGA": "R",  # Arginine
+    "CGG": "R",  # Arginine
+    "AGT": "S",  # Serine
+    "AGC": "S",  # Serine
+    "AGA": "R",  # Arginine
+    "AGG": "R",  # Arginine
+    "GGT": "G",  # Glycine
+    "GGC": "G",  # Glycine
+    "GGA": "G",  # Glycine
+    "GGG": "G"   # Glycine
+}
+
+
+
+def create_sets_aa_one_hot(pos_sequences, neg_sequences,overlapping='overlapping', split=False):
+  s = []
+  
+
+  set_x_pos = convert_sequences_to_aa_one_hot(pos_sequences, overlapping)
+  
+  set_x_neg = convert_sequences_to_aa_one_hot(neg_sequences, overlapping)
+
+
+  set_x = np.concatenate((set_x_pos, set_x_neg)) 
+
+  set_y_pos = np.ones((set_x_pos.shape[0],1), dtype=int)
+  set_y_neg = np.zeros((set_x_neg.shape[0],1), dtype=int)
+
+  set_y = np.concatenate((set_y_pos, set_y_neg)) 
+
+  sample_dim = [set_x.shape[1], set_x.shape[2]]
+
+  if split == True:
+
+    train_x, val_x, train_y, val_y = train_test_split(set_x, set_y, shuffle=False, test_size=0.33)  ##np make shuffle==False
+
+    sample_dim = [train_x.shape[1], train_x.shape[2]]
+
+    train_x, train_y = shuffle(train_x, train_y)
+    val_x, val_y = shuffle(val_x, val_y)
+
+    return [train_x, train_y, val_x, val_y, sample_dim]
+  
+  else:
+    set_x, set_y = shuffle(set_x, set_y)
+
+    return [set_x, set_y, sample_dim]
+
+######
+def convert_sequences_to_aa_one_hot(sequences, overlapping):
+  sequences=np.array([list(sequence) for sequence in sequences]) ##added to convert list to nparray of nts
+  
+  one_samples = aa_one_hot_encoding(sequences,overlapping) 
+  return one_samples
+
+######
+def aa_one_hot_encoding (sequences,overlapping): ## add the k in args
+
+  aaOneHotDict,aa=np_generate_all_aa_one_hot()
+ 
+  num_rows = num_of_kmers(3, sequences[0], overlapping) #num of 3mers in sequence
+  num_cols = len(aa) ## size of on hot encoding
+  
+  aa_onehot_samples = np.zeros(shape = (sequences.shape[0], num_rows, num_cols), dtype=np.float16)
+
+  for (i, sequence) in enumerate(sequences):
+    aaSeq = codon_to_aa(sequence, overlapping)
+
+    for (row_position, kmer) in enumerate(aaSeq):
+      if kmer in aaOneHotDict:
+        kmer_one_hot = aaOneHotDict[kmer]
+
+      for (col_position, num) in enumerate(kmer_one_hot):
+ 
+        aa_onehot_samples[i, row_position, col_position] = num
+      
+  return aa_onehot_samples
+
+
+######
+def np_generate_all_aa_one_hot():
+    nucleotides = ['A', 'T', 'C', 'G']
+    amino_acids = ["A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V","*"]
+    kmers = ['']
+    aaOneHotDict={}
+    #####
+    for amino_acid in amino_acids:
+      one_hot_encode = [0] * len(amino_acids)
+      index = amino_acids.index(amino_acid)
+      one_hot_encode[index] = 1
+      aaOneHotDict[amino_acid]=one_hot_encode
+
+
+
+    kmer_to_index = {kmer: i for i, kmer in enumerate(kmers)}
+    num_kmers = len(kmers)
+    kmersOnHotDict={}
+    one_hot_enc_kmers = np.zeros((num_kmers, num_kmers), dtype=int)
+    for i, kmer in enumerate(kmers):
+        one_hot_enc_kmers[i, kmer_to_index[kmer]] = 1
+    
+    for i, kmer in enumerate(kmers):
+        onHot=np.asarray(one_hot_enc_kmers[:,i])
+
+        kmersOnHotDict[kmer]=onHot
+
+    return aaOneHotDict,amino_acids
+
+######
+# returns the number of kmers of a sequence
+def num_of_aa(k, sequence, overlapping):
+  if overlapping == "non-overlapping":
+    return int(len(sequence) / k)
+  else:
+    return int(len(sequence) - k +1)
+  
+def codon_to_aa(sequence, overlapping):
+  aaList = []
+  shift = 0
+  count_aa = 0
+
+  if overlapping == 'non-overlapping':
+    shift = 3
+    # count_aa = len(sequence)
+    count_aa = num_of_kmers(3,sequence, overlapping)
+ 
+
+  else:  ##if overlapping
+    shift = 1
+    # count_aa = len(sequence) - k +1
+    count_aa = num_of_kmers(3, sequence, overlapping)
+
+  for i in range(0, count_aa): #########
+
+    kmer = ''
+    for j in range(3):
+      kmer += sequence[i*shift+j]
+      
+
+    aa=codonDNA_to_amino_acid[kmer]
+    aaList.append(aa)
+
+  return aaList
+  
